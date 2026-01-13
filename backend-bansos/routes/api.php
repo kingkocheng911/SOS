@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\WargaController;
 use App\Http\Controllers\Api\ProgramBantuanController;
 use App\Http\Controllers\Api\SeleksiController;
 use App\Http\Controllers\Api\PenyaluranController;
+use App\Http\Controllers\Api\NotifikasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,8 +17,7 @@ use App\Http\Controllers\Api\PenyaluranController;
 // ==============================
 // 1. ZONA PUBLIK (Bisa diakses tanpa Login)
 // ==============================
-// Register & Login ditaruh di sini agar bisa diakses siapapun
-Route::post('/register', [AuthController::class, 'register']); // <--- SUDAH DIPINDAHKAN KE SINI (BENAR)
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 
@@ -26,27 +26,39 @@ Route::post('/login', [AuthController::class, 'login']);
 // ==============================
 Route::middleware('auth:sanctum')->group(function () {
 
-    // Fitur Logout
+    // --- A. AUTHENTICATION ---
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/user/update', [WargaController::class, 'updateProfile']); // Route untuk Simpan Profil
 
-    // A. Route Data Warga
-    Route::get('/warga', [WargaController::class, 'index']);
-    Route::post('/warga', [WargaController::class, 'store']);
+    // --- B. WARGA / BANSOS (Frontend HomeWarga.jsx) ---
+    Route::get('/warga', [WargaController::class, 'index']); // Dashboard Admin
+    Route::post('/warga', [WargaController::class, 'store']); // Dashboard Admin
+    
+    // Perbaikan: Ubah '/cek-bansos-saya' menjadi '/warga/cek-status' agar sesuai React
+    Route::get('/warga/cek-status', [WargaController::class, 'cekStatusBansos']); 
+    
+    // Route untuk Warga Mengajukan
+    Route::post('/warga/ajukan', [WargaController::class, 'tambahPengajuan']);
 
-    // B. Route Program Bantuan
+
+    // --- C. PROGRAM BANTUAN ---
     Route::get('/program', [ProgramBantuanController::class, 'index']);
     Route::post('/program', [ProgramBantuanController::class, 'store']);
 
-    // C. Route Seleksi
+
+    // --- D. SELEKSI PENERIMA ---
     Route::get('/seleksi', [SeleksiController::class, 'index']);
     Route::post('/seleksi', [SeleksiController::class, 'store']);
-    Route::apiResource('/seleksi', App\Http\Controllers\Api\SeleksiController::class);
+    // Approve & Reject
+    Route::post('/seleksi/{id}/approve', [SeleksiController::class, 'approve']);
+    Route::post('/seleksi/{id}/reject', [SeleksiController::class, 'reject']);
+    // Resource Controller (Opsional jika butuh show/update/delete lengkap)
+    Route::apiResource('/seleksi-resource', SeleksiController::class);
 
-    // D. Route Penyaluran
+
+    // --- E. PENYALURAN ---
     Route::get('/penyaluran', [PenyaluranController::class, 'index']);
     Route::post('/penyaluran', [PenyaluranController::class, 'store']);
 
-    Route::post('/seleksi/{id}/approve', [SeleksiController::class, 'approve']);
-    Route::post('/seleksi/{id}/reject', [SeleksiController::class, 'reject']);
-
+    Route::get('/notifikasi', [NotifikasiController::class, 'index']);
 });

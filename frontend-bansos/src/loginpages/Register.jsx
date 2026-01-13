@@ -1,123 +1,150 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
-import "./Login.css"; // Kita pakai CSS yang sama dengan Login
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom';
 
-function Register() {
-    // State untuk form
-    const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        password: "",
-        password_confirmation: ""
-    });
+const Register = () => {
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordConfirm, setPasswordConfirm] = useState("");
+    const [nik, setNik] = useState(""); // <--- STATE BARU UNTUK NIK
     
-    // State untuk error validasi dari server
-    const [validationErrors, setValidationErrors] = useState({});
-    
+    const [validation, setValidation] = useState([]);
     const navigate = useNavigate();
-
-    // Handle perubahan input
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        
+
+        // Data yang dikirim ke Backend
+        const formData = {
+            name: name,
+            email: email,
+            password: password,
+            password_confirmation: passwordConfirm,
+            nik: nik // <--- KIRIM NIK
+        };
+
         try {
-            await axios.post("http://127.0.0.1:8000/api/register", formData);
+            await axios.post('http://localhost:8000/api/register', formData);
             
+            // Jika sukses
             alert("Registrasi Berhasil! Silakan Login.");
-            navigate("/login"); // Redirect ke halaman login
-            
+            navigate('/login');
+
         } catch (error) {
-            if (error.response && error.response.status === 422) {
-                // Jika error validasi (email kembar / password beda)
-                setValidationErrors(error.response.data);
-            } else {
-                alert("Terjadi kesalahan pada server.");
-                console.error(error);
-            }
+            // Jika error (misal NIK sudah dipakai)
+            setValidation(error.response.data);
         }
     };
 
     return (
-        <div className="login-page">
-            <div className="card login-card">
-                
-                {/* Header Biru */}
-                <div className="login-header">
-                    <h4>DAFTAR AKUN</h4>
-                    <small>Buat akun warga baru</small>
+        <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
+            <div className="card shadow-lg border-0 rounded-4 p-4" style={{ width: '400px' }}>
+                <div className="text-center mb-4">
+                    <h3 className="fw-bold text-success">Daftar Akun</h3>
+                    <p className="text-muted small">Silakan isi data diri sesuai KTP</p>
                 </div>
 
-                <div className="login-body">
-                    <form onSubmit={handleRegister}>
-                        
-                        {/* Nama Lengkap */}
-                        <div className="mb-3">
-                            <label className="form-label text-muted">Nama Lengkap</label>
-                            <input 
-                                type="text" name="name"
-                                className="form-control"
-                                value={formData.name} onChange={handleChange}
-                                required 
-                            />
-                            {validationErrors.name && <small className="text-danger">{validationErrors.name[0]}</small>}
+                <form onSubmit={handleRegister}>
+                    
+                    {/* INPUT NAMA */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold small">Nama Lengkap</label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            value={name} 
+                            onChange={(e) => setName(e.target.value)} 
+                            placeholder="Masukkan Nama Sesuai KTP"
+                            required
+                        />
+                        {validation.name && (
+                            <div className="text-danger small mt-1">{validation.name[0]}</div>
+                        )}
+                    </div>
+
+                    {/* INPUT NIK (BARU) */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold small">NIK (Nomor Induk Kependudukan)</label>
+                        <input 
+                            type="text" 
+                            className="form-control" 
+                            value={nik} 
+                            onChange={(e) => {
+                                // Hanya boleh angka
+                                const value = e.target.value;
+                                if (/^\d*$/.test(value)) { 
+                                    setNik(value); 
+                                }
+                            }} 
+                            placeholder="16 Digit Angka"
+                            maxLength={16}
+                            required
+                        />
+                        <div className="d-flex justify-content-between">
+                            {validation.nik && <div className="text-danger small">{validation.nik[0]}</div>}
+                            <small className="text-muted ms-auto">{nik.length}/16</small>
                         </div>
+                    </div>
 
-                        {/* Email */}
-                        <div className="mb-3">
-                            <label className="form-label text-muted">Email Address</label>
-                            <input 
-                                type="email" name="email"
-                                className="form-control"
-                                value={formData.email} onChange={handleChange}
-                                required 
-                            />
-                            {validationErrors.email && <small className="text-danger">{validationErrors.email[0]}</small>}
-                        </div>
+                    {/* INPUT EMAIL */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold small">Alamat Email</label>
+                        <input 
+                            type="email" 
+                            className="form-control" 
+                            value={email} 
+                            onChange={(e) => setEmail(e.target.value)} 
+                            placeholder="contoh@email.com"
+                            required
+                        />
+                        {validation.email && (
+                            <div className="text-danger small mt-1">{validation.email[0]}</div>
+                        )}
+                    </div>
 
-                        {/* Password */}
-                        <div className="mb-3">
-                            <label className="form-label text-muted">Password</label>
-                            <input 
-                                type="password" name="password"
-                                className="form-control"
-                                value={formData.password} onChange={handleChange}
-                                placeholder="Minimal 8 karakter"
-                                required 
-                            />
-                            {validationErrors.password && <small className="text-danger">{validationErrors.password[0]}</small>}
-                        </div>
+                    {/* INPUT PASSWORD */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold small">Password</label>
+                        <input 
+                            type="password" 
+                            className="form-control" 
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            placeholder="Minimal 8 karakter"
+                            required
+                        />
+                        {validation.password && (
+                            <div className="text-danger small mt-1">{validation.password[0]}</div>
+                        )}
+                    </div>
 
-                        {/* Konfirmasi Password */}
-                        <div className="mb-4">
-                            <label className="form-label text-muted">Konfirmasi Password</label>
-                            <input 
-                                type="password" name="password_confirmation"
-                                className="form-control"
-                                value={formData.password_confirmation} onChange={handleChange}
-                                placeholder="Ulangi password"
-                                required 
-                            />
-                        </div>
+                        {/* INPUT KONFIRMASI PASSWORD (BARU) */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold small">Ulangi Password</label>
+                        <input 
+                            type="password" 
+                            className="form-control" 
+                            value={passwordConfirm} 
+                            onChange={(e) => setPasswordConfirm(e.target.value)} 
+                            placeholder="Ketik ulang password Anda"
+                            required
+                        />
+                    </div>
 
-                        <button type="submit" className="btn btn-primary w-100 btn-login mb-3">
-                            DAFTAR SEKARANG
-                        </button>
+                    <button type="submit" className="btn btn-success w-100 py-2 fw-bold mt-2">
+                        DAFTAR SEKARANG
+                    </button>
+                </form>
 
-                        <div className="text-center">
-                            <span className="text-muted me-1">Sudah punya akun?</span>
-                            <Link to="/login" className="text-decoration-none fw-bold">Login disini</Link>
-                        </div>
-
-                    </form>
+                <div className="text-center mt-3">
+                    <small className="text-muted">
+                        Sudah punya akun? <Link to="/login" className="text-success fw-bold text-decoration-none">Login Disini</Link>
+                    </small>
                 </div>
             </div>
         </div>
     );
-}
+};
 
 export default Register;

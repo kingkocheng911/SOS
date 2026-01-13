@@ -11,14 +11,15 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    // --- FITUR REGISTER (BARU) ---
+    // --- FITUR REGISTER (DENGAN NIK) ---
     public function register(Request $request)
     {
         // 1. Validasi Input
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|max:255',
-            'email'     => 'required|string|email|max:255|unique:users', // Email gak boleh kembar
-            'password'  => 'required|string|min:8|confirmed', // Harus ada field password_confirmation
+            'email'     => 'required|string|email|max:255|unique:users', // Email harus unik
+            'password'  => 'required|string|min:8', // Perlu field password_confirmation
+            'nik'       => 'required|numeric|digits:16|unique:users', // <--- WAJIB: NIK 16 digit & unik
         ]);
 
         // Jika validasi gagal
@@ -31,7 +32,8 @@ class AuthController extends Controller
             'name'      => $request->name,
             'email'     => $request->email,
             'password'  => Hash::make($request->password), // Enkripsi password
-            'role'      => 'user' // Default role adalah 'user' (Warga)
+            'role'      => 'warga', // <--- PENTING: Saya ubah jadi 'warga' agar sesuai Frontend
+            'nik'       => $request->nik // <--- Simpan NIK ke database
         ]);
 
         // 3. Kembalikan Respon Sukses
@@ -67,8 +69,8 @@ class AuthController extends Controller
             'status' => true,
             'message' => 'Login sukses',
             'data' => [
-                'user' => $user,
-                'token' => $token // Ini kunci masuknya
+                'user' => $user, // Data user (termasuk NIK & role) akan terkirim ke frontend
+                'token' => $token 
             ]
         ]);
     }

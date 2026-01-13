@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Pengajuan;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
@@ -28,10 +29,18 @@ class DatabaseSeeder extends Seeder
 
         // 3. Buat Akun User Biasa (Warga)
         User::create([
-            'name' => 'Warga Contoh',
-            'email' => 'warga@bansos.com',
-            'password' => Hash::make('password123'),
-            'role' => 'user'
-        ]);
+        'name' => 'Budi Santoso',
+        'email' => 'budi@bansos.com',
+        'password' => Hash::make('password123'),
+        'role' => 'warga',
+        'nik' => '1234567890123456' // <--- NIK INI KUNCINYA
+    ]);
+
+        Pengajuan::create([
+        'nik_warga' => '1234567890123456', // <--- HARUS SAMA PERSIS DENGAN NIK BUDI
+        'nama_warga' => 'Budi Santoso',
+        'jenis_bansos' => 'BLT Dana Desa',
+        'status' => 'approved' // Ceritanya sudah disetujui
+    ]);
     }
 }

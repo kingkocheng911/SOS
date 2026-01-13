@@ -21,6 +21,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role', // <--- PENTING: Pastikan ini ada agar tidak error saat Register
+        'nik',
+        'alamat',   // Pastikan ini ada
+        'no_telp',  // Pastikan ini ada
+        'foto',
     ];
 
     /**
