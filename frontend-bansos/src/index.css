@@ -1,0 +1,24 @@
+/* src/index.css */
+
+/* Reset dasar agar aplikasi full screen */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #f8f9fa; /* Warna background abu-abu muda */
+}
+
+/* Pastikan elemen root React mengambil lebar penuh */
+#root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left; /* Default Vite biasanya center, kita ubah ke left */
+}

@@ -1,0 +1,56 @@
+/* src/pages/Login.css */
+
+/* 1. Mengatur Background Halaman Login */
+.login-page {
+  /* Tinggi layar penuh agar bisa ditengah vertikal */
+  min-height: 100vh; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* Warna background gradasi biru muda (ala admin panel) */
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* 2. Mempercantik Kartu Login */
+.login-card {
+  width: 100%;
+  max-width: 400px; /* Batas lebar kartu */
+  border: none;     /* Hapus garis border bawaan bootstrap */
+  border-radius: 15px; /* Sudut melengkung */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Bayangan halus (efek melayang) */
+  overflow: hidden; /* Agar sudut header ikut melengkung */
+  background-color: white;
+}
+
+/* 3. Header Biru di atas kartu */
+.login-header {
+  background-color: #4e73df; /* Biru modern */
+  padding: 20px;
+  text-align: center;
+  color: white;
+}
+
+.login-header h4 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* 4. Body Kartu (Formulir) */
+.login-body {
+  padding: 30px;
+}
+
+/* 5. Tombol Custom */
+.btn-login {
+  background-color: #4e73df;
+  border: none;
+  padding: 10px;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-login:hover {
+  background-color: #2e59d9; /* Warna saat mouse diarahkan */
+}
