@@ -1,0 +1,107 @@
+/* =========================
+   DASHBOARD ADMIN STYLING
+   TANPA UBAH JSX & LOGIC
+   ========================= */
+
+/* Override card admin */
+.card.bg-primary,
+.card.bg-success {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  min-height: 120px;
+}
+
+/* Garis warna di atas card */
+.card.bg-primary::before,
+.card.bg-success::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+}
+
+/* Warna garis */
+.card.bg-primary::before {
+  background: #2563eb; /* biru */
+}
+
+.card.bg-success::before {
+  background: #16a34a; /* hijau */
+}
+
+/* Isi card */
+.card.bg-primary .card-body,
+.card.bg-success .card-body {
+  padding: 24px;
+}
+
+/* Angka */
+.card.bg-primary h3,
+.card.bg-success h3 {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+/* Warna angka */
+.card.bg-primary h3 {
+  color: #2563eb;
+}
+
+.card.bg-success h3 {
+  color: #16a34a;
+}
+
+/* Text keterangan */
+.card.bg-primary p,
+.card.bg-success p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.card.bg-primary,
+.card.bg-success {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* warna default angka */
+.card.bg-primary h3 {
+  color: #2563eb;
+}
+
+.card.bg-success h3 {
+  color: #16a34a;
+}
+
+/* hover: card naik + shadow */
+.card.bg-primary:hover,
+.card.bg-success:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* hover: garis atas berubah warna */
+.card.bg-primary:hover::before {
+  background: #1e40af; /* biru lebih gelap */
+}
+
+.card.bg-success:hover::before {
+  background: #166534; /* hijau lebih gelap */
+}
+
+/* hover: angka ikut berubah warna */
+.card.bg-primary:hover h3 {
+  color: #1e40af;
+}
+
+.card.bg-success:hover h3 {
+  color: #166534;
+}

@@ -82,7 +82,7 @@ function Login() {
                         </div>
                         
                         <button type="submit" className="btn btn-primary w-100 btn-login mb-3">
-                            MASUK APLIKASI
+                            LOGIN
                         </button>
 
                         {/* --- LINK MENUJU REGISTER --- */}
