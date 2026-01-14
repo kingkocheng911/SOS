@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
+import "./Navbar.css";
 
 function Navbar() {
     const navigate = useNavigate();
