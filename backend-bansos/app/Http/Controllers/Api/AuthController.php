@@ -86,4 +86,41 @@ class AuthController extends Controller
             'message' => 'Logout berhasil'
         ]);
     }
+
+    public function getDataWilayah()
+{
+    // Kita pindahkan data yang tadi di React ke sini
+    $dataWilayah = [
+        [
+            "nama_dukuh" => "Dukuh Krajan",
+            "list_rw" => [
+                [
+                    "rw" => "01",
+                    "list_rt" => ["01", "02", "03", "04"]
+                ],
+                [
+                    "rw" => "02",
+                    "list_rt" => ["05", "06", "07"]
+                ]
+            ]
+        ],
+        [
+            "nama_dukuh" => "Dukuh Sukamaju",
+            "list_rw" => [
+                [
+                    "rw" => "03",
+                    "list_rt" => ["08", "09", "10"]
+                ],
+                [
+                    "rw" => "04",
+                    "list_rt" => ["11", "12"]
+                ]
+            ]
+        ]
+        // Tambahkan dukuh lain di sini...
+    ];
+
+    return response()->json($dataWilayah);
+}
+
 }

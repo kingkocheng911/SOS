@@ -10,58 +10,57 @@ use App\Models\Seleksi;
 class PenyaluranController extends Controller
 {
     public function index()
-    {
-        // 1. Ambil Data Riwayat
+{
+    try {
+        // Mengambil riwayat penyaluran beserta relasi berantai
         $riwayat = Penyaluran::with(['seleksi.warga', 'seleksi.programBantuan'])
                     ->latest()
                     ->get();
 
-        // 2. Ambil Data untuk Dropdown (Data yang SIAP DISALURKAN)
-        // PERBAIKAN: Menggunakan whereIn untuk mengantisipasi perbedaan huruf besar/kecil di database
         $siapSalur = Seleksi::with(['warga', 'programBantuan'])
-                    ->whereIn('status', ['Disetujui', 'disetujui', 'DISETUJUI']) 
-                    // Opsional: Tambahkan ini untuk memastikan data yang diambil belum ada di tabel penyaluran (double check)
+                    ->where('status', 2) 
                     ->doesntHave('penyaluran') 
                     ->get();
-
-        // DEBUGGING: Jika dropdown masih kosong, coba 'uncomment' baris di bawah ini 
-        // dan 'comment' query $siapSalur di atas untuk melihat apakah data masuk tanpa filter.
-        // $siapSalur = Seleksi::with(['warga', 'programBantuan'])->get();
 
         return response()->json([
             'status' => true,
             'riwayat' => $riwayat,
             'siap_salur' => $siapSalur
         ]);
+    } catch (\Exception $e) {
+        // Memberikan detail error ke konsol browser jika status 500
+        return response()->json([
+            'status' => false, 
+            'message' => 'Error: ' . $e->getMessage()
+        ], 500);
     }
-
+}
     public function store(Request $request)
     {
         $request->validate([
             'seleksi_id' => 'required',
-            'tanggal_penyaluran' => 'required',
-            'keterangan' => 'required',
+            'tanggal_penyaluran' => 'required|date',
+            'keterangan' => 'required|string',
         ]);
 
         try {
-            // 1. Simpan ke Tabel Penyaluran
+            // Simpan ke tabel penyaluran_bantuans
             $penyaluran = Penyaluran::create([
                 'seleksi_id' => $request->seleksi_id,
                 'tanggal_penyaluran' => $request->tanggal_penyaluran,
                 'keterangan' => $request->keterangan,
             ]);
 
-            // 2. Update Status di Tabel Seleksi jadi 'Disalurkan'
-            // Supaya nama warga hilang dari dropdown setelah disalurkan
+            // Update Status Seleksi jadi 'Disalurkan' (4)
             $seleksi = Seleksi::find($request->seleksi_id);
             if ($seleksi) {
-                $seleksi->update(['status' => 'Disalurkan']);
+                $seleksi->update(['status' => 4]); 
             }
 
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil disalurkan!',
-                'data' => $penyaluran
+                'message' => 'Bantuan berhasil disalurkan!',
+                'data' => $penyaluran->load(['seleksi.warga', 'seleksi.programBantuan'])
             ]);
 
         } catch (\Exception $e) {

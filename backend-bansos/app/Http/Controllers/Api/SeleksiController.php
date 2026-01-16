@@ -4,20 +4,24 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Seleksi; 
+use App\Models\Seleksi;
+use App\Models\User;
+use App\Models\Warga; // TAMBAHKAN MODEL INI
+use App\Models\ProgramBantuan; 
+use App\Models\Notifikasi; // TAMBAHKAN MODEL INI
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class SeleksiController extends Controller
 {
     /**
-     * Menampilkan daftar data seleksi (Gabungan Warga & Program)
+     * 1. DAFTAR DATA SELEKSI (HISTORY)
      */
     public function index()
     {
-        // Mengambil data seleksi beserta relasi Warga dan Program Bantuan
         $data = Seleksi::with(['warga', 'programBantuan'])
-                       ->orderBy('created_at', 'desc')
-                       ->get();
+                        ->orderBy('created_at', 'desc')
+                        ->get();
 
         return response()->json([
             'status' => true,
@@ -27,21 +31,74 @@ class SeleksiController extends Controller
     }
 
     /**
-     * Admin mendaftarkan warga ke program
+     * 2. FITUR SELEKSI OTOMATIS
+     */
+    public function filterKandidat(Request $request)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'program_id' => 'required|exists:program_bantuans,id'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json(['status' => false, 'message' => 'Program ID tidak valid'], 400);
+            }
+
+            $programId = $request->program_id;
+            $program = ProgramBantuan::find($programId);
+
+            if (!$program) {
+                return response()->json(['status' => false, 'message' => 'Program tidak ditemukan'], 404);
+            }
+
+            $query = User::where('role', 'warga');
+
+            if (!empty($program->maksimal_penghasilan)) {
+                $query->where('gaji', '<=', $program->maksimal_penghasilan);
+            }
+
+            if (!empty($program->minimal_tanggungan)) {
+                $query->where('tanggungan', '>=', $program->minimal_tanggungan);
+            }
+
+            $query->whereDoesntHave('seleksi', function($q) use ($programId) {
+                $q->where('program_bantuan_id', $programId);
+            });
+
+            $kandidat = $query->get();
+
+            $kandidat->transform(function($item) {
+                $item->nama = $item->name; 
+                return $item;
+            });
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Filter otomatis berhasil dijalankan',
+                'data' => $kandidat
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Error Filter: " . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan server.',
+                'error_detail' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 3. SIMPAN PENDAFTARAN (STORE)
+     * Ditambahkan: Notifikasi pendaftaran berhasil dikirim.
      */
     public function store(Request $request)
     {
-        // 1. TANGANI NAMA KOLOM (Agar tidak Error 500)
-        // Frontend mungkin mengirim 'program_id' ATAU 'program_bantuan_id'.
-        // Kita ambil mana yang ada.
         $programId = $request->program_bantuan_id ?? $request->program_id;
-
-        // Masukkan kembali ke request agar validator bisa membacanya
         $request->merge(['program_bantuan_id' => $programId]);
 
-        // 2. VALIDASI
         $validator = Validator::make($request->all(), [
-            'warga_id'           => 'required|exists:wargas,id',
+            'warga_id'           => 'required|exists:users,id',
             'program_bantuan_id' => 'required|exists:program_bantuans,id', 
         ]);
 
@@ -50,32 +107,45 @@ class SeleksiController extends Controller
         }
 
         try {
-            // 3. CEK DUPLIKASI
-            // Mencegah warga mendaftar 2x di program yang sama jika status belum ditolak
-            $cek = Seleksi::where('warga_id', $request->warga_id)
+            // PERBAIKAN LOGIKA: Cari data di tabel wargas berdasarkan user_id yang dikirim
+            $wargaRecord = Warga::where('user_id', $request->warga_id)->first();
+
+            if (!$wargaRecord) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Profil Warga tidak ditemukan. Silakan isi profil terlebih dahulu.'
+                ], 422);
+            }
+
+            // Gunakan ID dari tabel wargas untuk pengecekan seleksi
+            $cek = Seleksi::where('warga_id', $wargaRecord->id)
                           ->where('program_bantuan_id', $programId)
-                          ->where('status', '!=', 3) // Anggap 3 adalah 'Ditolak'
-                          ->where('status', '!=', 'Ditolak') // Jaga-jaga jika pakai string
                           ->first();
 
             if ($cek) {
                 return response()->json([
-                    'status' => false,
-                    'message' => 'Warga ini sudah terdaftar di program tersebut dan sedang diproses!'
-                ], 409); // 409 Conflict
+                    'status' => false, 
+                    'message' => 'Warga ini sudah terdaftar di program ini.'
+                ], 409);
             }
 
-            // 4. SIMPAN KE DATABASE
             $seleksi = Seleksi::create([
-                'warga_id'           => $request->warga_id,
+                'warga_id'           => $wargaRecord->id, // Menggunakan ID asli dari tabel wargas
                 'program_bantuan_id' => $programId, 
-                // Default status: 1 (Menunggu). Jika DB Anda pakai String, ubah jadi 'Menunggu Persetujuan'
-                'status'             => 1, 
+                'status'             => 1,
+            ]);
+
+            // --- TAMBAHKAN NOTIFIKASI DISINI ---
+            $namaProgram = ProgramBantuan::find($programId)->nama_program ?? 'Program Bantuan';
+            Notifikasi::create([
+                'user_id' => $request->warga_id, // Tetap gunakan user_id agar notif muncul di akun warga
+                'pesan'   => "Pendaftaran Anda untuk " . $namaProgram . " telah berhasil dikirim dan sedang menunggu tinjauan Kades.",
+                'is_read' => false
             ]);
 
             return response()->json([
                 'status'  => true,
-                'message' => 'Berhasil didaftarkan. Menunggu persetujuan Kades.',
+                'message' => 'Warga berhasil didaftarkan.',
                 'data'    => $seleksi
             ], 201);
 
@@ -85,35 +155,40 @@ class SeleksiController extends Controller
     }
 
     /**
-     * Update Status (Untuk Tombol Setuju/Tolak Kades)
+     * 4. UPDATE STATUS
+     * Ditambahkan: Notifikasi perubahan status (Disetujui/Ditolak).
      */
     public function update(Request $request, $id)
     {
-        // 1. Cari data
-        $seleksi = Seleksi::find($id);
+        // Gunakan with untuk mengambil info program agar bisa dimasukkan ke pesan notif
+        $seleksi = Seleksi::with('programBantuan')->find($id);
 
         if (!$seleksi) {
-            return response()->json(['message' => 'Data Seleksi tidak ditemukan.'], 404);
-        }
-
-        // 2. Validasi input status
-        $validator = Validator::make($request->all(), [
-            'status' => 'required' 
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['message' => 'Data seleksi tidak ditemukan.'], 404);
         }
 
         try {
-            // 3. Update Status
             $seleksi->update([
-                'status' => $request->status
+                'status' => $request->status 
             ]);
+
+            // --- LOGIKA NOTIFIKASI OTOMATIS ---
+            $statusTeks = $request->status == 2 ? 'DISETUJUI' : 'DITOLAK';
+            $namaProgram = $seleksi->programBantuan->nama_program ?? 'Program Bantuan';
+            
+            // Cari user_id dari tabel warga untuk mengirim notif
+            $warga = Warga::find($seleksi->warga_id);
+            if ($warga) {
+                Notifikasi::create([
+                    'user_id' => $warga->user_id,
+                    'pesan'   => "Pembaruan: Pengajuan Anda untuk " . $namaProgram . " telah " . $statusTeks . " oleh Kepala Desa.",
+                    'is_read' => false
+                ]);
+            }
 
             return response()->json([
                 'status'  => true,
-                'message' => 'Status berhasil diperbarui!',
+                'message' => 'Status seleksi diperbarui dan notifikasi dikirim!',
                 'data'    => $seleksi
             ], 200);
 
@@ -123,7 +198,7 @@ class SeleksiController extends Controller
     }
 
     /**
-     * Menghapus data seleksi
+     * 5. HAPUS DATA
      */
     public function destroy($id)
     {

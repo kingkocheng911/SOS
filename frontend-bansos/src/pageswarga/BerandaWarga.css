@@ -1,0 +1,144 @@
+/* --- LAYOUT UTAMA --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Membagi 2 kolom jika layar lebar */
+    gap: 24px;
+}
+
+/* Responsif untuk layar kecil */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Jadi 1 kolom di HP */
+    }
+}
+
+/* --- KARTU SPESIAL: Status Bantuan --- */
+.hero-status-card {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.02);
+    transition: transform 0.3s ease;
+    min-height: 200px; /* Tinggi minimum agar terlihat gagah */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero-status-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Hiasan background abstrak default (Orange/Pending) */
+.hero-status-card::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+    border-radius: 50%;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+/* Teks Status */
+.status-label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.status-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    position: relative;
+    z-index: 1;
+    /* Default: Orange Gradient */
+    background: -webkit-linear-gradient(45deg, #f59e0b, #d97706);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* --- VARIASI WARNA STATUS (TAMBAHAN) --- */
+
+/* 1. Status: DISETUJUI (Hijau) */
+.hero-status-card.status-success::before {
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+.hero-status-card.status-success .status-value {
+    background: -webkit-linear-gradient(45deg, #34d399, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 2. Status: DITOLAK (Merah) */
+.hero-status-card.status-danger::before {
+    background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
+}
+.hero-status-card.status-danger .status-value {
+    background: -webkit-linear-gradient(45deg, #f87171, #dc2626);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 3. Status: BELUM ADA (Abu/Biru) */
+.hero-status-card.status-neutral::before {
+    background: linear-gradient(135deg, #9ca3af 0%, #4b5563 100%);
+}
+.hero-status-card.status-neutral .status-value {
+    background: none;
+    -webkit-text-fill-color: #374151; /* Warna solid gelap */
+    font-size: 1.5rem; /* Lebih kecil sedikit */
+}
+
+/* --- KARTU INFO (Bawah/Samping) --- */
+.info-box {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+    border-left: 6px solid #3b82f6; /* Aksen garis biru */
+    height: 100%;
+}
+
+.info-box h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.info-list {
+    padding-left: 1rem;
+    color: #4b5563;
+}
+
+.info-list li {
+    margin-bottom: 0.5rem;
+}
+
+/* Tombol CTA di dalam kartu */
+.btn-cta {
+    margin-top: 10px;
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2563eb;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    transition: background 0.2s;
+}
+.btn-cta:hover {
+    background-color: #1d4ed8;
+    color: white;
+}

@@ -1,0 +1,110 @@
+/* --- GLOBAL AUTH BACKGROUND --- */
+.auth-container {
+    min-height: 100vh;
+    width: 100%;
+    /* Gradient biru keabu-abuan yang lembut, tidak menyakitkan mata */
+    background: linear-gradient(135deg, #eef2f6 0%, #e0e7ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* --- CARD STYLE --- */
+.auth-card {
+    background-color: #ffffff; /* Tetap putih agar kontras dengan input, tapi soft */
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04); /* Bayangan sangat halus */
+    overflow: hidden;
+    width: 100%;
+    max-width: 450px; /* Lebar maksimal di desktop */
+    padding: 40px 30px;
+    transition: transform 0.2s ease;
+}
+
+/* --- TYPOGRAPHY --- */
+.auth-title {
+    font-weight: 800;
+    color: #1e293b; /* Dark Blue-Gray */
+    margin-bottom: 5px;
+}
+
+.auth-subtitle {
+    color: #64748b; /* Soft Gray */
+    font-size: 0.9rem;
+    margin-bottom: 30px;
+}
+
+/* --- FORM INPUTS --- */
+.form-control-custom {
+    background-color: #f8fafc; /* Latar input sedikit abu-abu, bukan putih silau */
+    border: 1px solid #e2e8f0;
+    padding: 12px 15px;
+    border-radius: 8px;
+    color: #334155;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control-custom:focus {
+    background-color: #ffffff;
+    border-color: #3b82f6; /* Biru Fokus */
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    outline: none;
+}
+
+/* Label di atas input */
+.form-label-custom {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* --- BUTTONS --- */
+.btn-primary-custom {
+    background: linear-gradient(to right, #2563eb, #3b82f6); /* Gradient Biru Profesional */
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+    background: linear-gradient(to right, #1d4ed8, #2563eb);
+}
+
+/* --- LINKS --- */
+.auth-link {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* --- ICONS IN INPUT --- */
+.input-group-text-custom {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-right: none;
+    color: #94a3b8;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+.form-control-icon {
+    border-left: none;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}

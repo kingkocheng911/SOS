@@ -14,9 +14,24 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            
+            // Ubah email jadi nullable karena pendaftaran via Admin tidak pakai email
+            $table->string('email')->unique()->nullable(); 
             $table->timestamp('email_verified_at')->nullable();
+            
             $table->string('password');
+            
+            // --- KOLOM BARU UNTUK BANSOS APP ---
+            $table->string('nik')->unique()->nullable(); // NIK Wajib Unik
+            $table->string('role')->default('warga');    // Default role 'warga'
+            $table->string('no_telp')->nullable();
+            $table->text('alamat')->nullable();          // Pakai text untuk alamat panjang
+            $table->string('pekerjaan')->nullable();
+            $table->bigInteger('gaji')->nullable();      // Pakai BigInteger untuk angka uang
+            $table->integer('tanggungan')->nullable();
+            $table->string('foto')->nullable();
+            // -----------------------------------
+
             $table->rememberToken();
             $table->timestamps();
         });

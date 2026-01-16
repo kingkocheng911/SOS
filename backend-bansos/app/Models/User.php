@@ -20,10 +20,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role', // <--- PENTING: Pastikan ini ada agar tidak error saat Register
         'nik',
-        'alamat',   // Pastikan ini ada
-        'no_telp',  // Pastikan ini ada
+        'role',
+        'no_telp',
+        'alamat',
+        'pekerjaan',
+        'gaji',
+        'tanggungan',
         'foto',
     ];
 
@@ -42,4 +45,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function seleksi()
+    {
+        // Relasi ke tabel seleksi
+        return $this->hasMany(Seleksi::class, 'warga_id');
+    }
 }
+

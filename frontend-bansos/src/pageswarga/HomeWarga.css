@@ -1,0 +1,134 @@
+/* --- LAYOUT UTAMA --- */
+.dashboard-layout {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* --- SIDEBAR --- */
+.sidebar-container {
+    width: 260px;
+    background: #ffffff;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+    z-index: 10;
+    position: fixed; /* Agar sidebar tetap diam saat scroll */
+    height: 100vh;
+    top: 0;
+    left: 0;
+}
+
+.sidebar-title {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #9ca3af;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    color: #4b5563;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background-color: #f0fdf4;
+    color: #059669;
+    transform: translateX(6px);
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.logout-btn {
+    color: #dc3545; /* Merah Bootstrap */
+}
+
+.logout-btn:hover {
+    background-color: #fef2f2;
+    color: #dc2626;
+}
+
+/* --- MAIN CONTENT AREA --- */
+.main-content {
+    flex: 1;
+    padding: 40px;
+    margin-left: 260px; /* Memberi ruang karena sidebar fixed */
+    overflow-y: auto;
+}
+
+/* --- HEADER COMPONENTS --- */
+.user-role-text {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.profile-avatar-container {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #0d6efd; /* Biru Bootstrap */
+    color: white;
+}
+
+/* --- NOTIFICATION CARD STYLING --- */
+.notification-card {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    background: white;
+}
+
+.notif-item {
+    padding: 1.5rem;
+}
+
+/* Style khusus untuk pesan belum dibaca */
+.notif-unread {
+    background-color: #ffffff;
+    border-left: 4px solid #0d6efd;
+}
+
+/* Style khusus untuk pesan sudah dibaca */
+.notif-read {
+    background-color: #f8f9fa; /* Abu-abu redup */
+    border-left: 4px solid transparent;
+}
+
+.empty-state-box {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.empty-state-icon {
+    display: inline-flex;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: #6c757d;
+}

@@ -1,0 +1,55 @@
+/* Styling Card & Layout */
+.persetujuan-header {
+  background-color: #0d6efd; /* Bootstrap Primary Blue */
+  color: white;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  color: #6c757d;
+  opacity: 0.5;
+}
+
+/* Styling Table */
+.cursor-pointer {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.col-action-width {
+  width: 150px;
+}
+
+/* Styling Checkbox Custom */
+.custom-checkbox {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+}
+
+.custom-checkbox-lg {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+}
+
+/* Styling Badge Custom (Biru Muda) */
+.badge-custom-blue {
+  background-color: #e7f1ff; /* Biru sangat muda */
+  color: #0d6efd; /* Biru text */
+  border: 1px solid #cff4fc;
+  padding: 0.5rem 1rem;
+  border-radius: 50rem; /* Pill shape */
+  font-weight: 500;
+}
+
+/* Tombol Tolak (Outline Merah jadi Merah Penuh saat Hover) */
+.btn-hover-danger {
+  transition: all 0.3s ease;
+}
+
+.btn-hover-danger:hover {
+  background-color: #dc3545; /* Merah */
+  border-color: #dc3545;
+  color: white !important;
+}

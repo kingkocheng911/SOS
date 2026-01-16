@@ -1,22 +1,23 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 
-// 1. IMPORT AUTH (Folder baru: pagesauth)
+// IMPORT AUTH
 import Login from "./loginpages/Login";
 import Register from "./loginpages/Register";
 
-// 2. IMPORT ADMIN (Folder: pagesadmin)
+// IMPORT ADMIN
 import Dashboard from "./pagesadmin/Dashboard";
-import Warga from "./pagesadmin/Warga"; // Pastikan file Warga.jsx ada di pagesadmin
+import Warga from "./pagesadmin/Warga"; 
 import Program from "./pagesadmin/Program"; 
 import Seleksi from "./pagesadmin/Seleksi";
 import Penyaluran from "./pagesadmin/Penyaluran";
 
-// 3. IMPORT KADES (Folder: pageskades)
+// IMPORT KADES
 import Persetujuan from "./pageskades/Persetujuan"; 
 
-// 4. IMPORT WARGA (Folder: pageswarga)
+// IMPORT WARGA
 import HomeWarga from "./pageswarga/HomeWarga"; 
 
 function App() {
@@ -31,45 +32,68 @@ function App() {
   const role = user?.role?.toLowerCase(); 
 
   return (
-    <div className="d-flex flex-column min-vh-100">
+    <div className="d-flex flex-column" style={{ height: '100vh', overflow: 'hidden' }}>
         
-        {/* Navbar: Tampil jika login & BUKAN warga */}
-        {token && role !== 'warga' && <Navbar />}
+        {/* Navbar */}
+        {token && <Navbar />}
 
-        {token ? (
-            <div className={role === 'warga' ? "" : "container flex-grow-1 mt-4"}>
-                <Routes>
-                    {/* === JALUR WARGA === */}
-                    <Route path="/home" element={<HomeWarga />} />
+        <div className="d-flex flex-grow-1" style={{ overflow: 'hidden' }}>
+            
+            {/* === BAGIAN SIDEBAR (KIRI) YANG DIEDIT === */}
+            {token && (
+                <div style={{ 
+                    width: '250px', 
+                    flexShrink: 0, 
+                    backgroundColor: '#fff', 
+                    borderRight: '1px solid #dee2e6',
+                    // PERUBAHAN DI SINI:
+                    overflow: 'hidden', // Menghilangkan semua scrollbar (Kanan & Bawah)
+                    display: 'flex',    // Memastikan isi sidebar rapi
+                    flexDirection: 'column'
+                }}>
+                    <Sidebar />
+                </div>
+            )}
 
-                    {/* === JALUR ADMIN === */}
-                    <Route path="/dashboard" element={role === 'warga' ? <Navigate to="/home" /> : <Dashboard />} />
-                    <Route path="/warga" element={role === 'warga' ? <Navigate to="/home" /> : <Warga />} />
-                    <Route path="/program" element={role === 'warga' ? <Navigate to="/home" /> : <Program />} />
-                    <Route path="/seleksi" element={role === 'warga' ? <Navigate to="/home" /> : <Seleksi />} />
-                    <Route path="/penyaluran" element={role === 'warga' ? <Navigate to="/home" /> : <Penyaluran />} />
-                    
-                    {/* === JALUR KADES === */}
-                    <Route path="/persetujuan" element={role === 'warga' ? <Navigate to="/home" /> : <Persetujuan />} />
-                    
-                    {/* === DEFAULT === */}
-                    <Route path="/" element={role === 'warga' ? <Navigate to="/home" /> : <Navigate to="/dashboard" />} />
-                    <Route path="/login" element={<Navigate to="/" />} />
-                    <Route path="/register" element={<Navigate to="/" />} />
-                </Routes>
-            </div>
-        ) : (
-            <div className="flex-grow-1 d-flex align-items-center justify-content-center"> 
-                <Routes>
-                    <Route path="/" element={<Login />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="*" element={<Navigate to="/login" />} />
-                </Routes>
-            </div>
-        )}
+            {/* === MAIN CONTENT (KANAN) === */}
+            <main className="flex-grow-1 d-flex flex-column" style={{ 
+                overflowY: 'auto', // Hanya bagian kanan yang boleh di-scroll
+                backgroundColor: '#f8f9fa' 
+            }}>
+                
+                <div className="p-4 flex-grow-1">
+                    {token ? (
+                        <Routes>
+                            {/* Route Warga */}
+                            <Route path="/home" element={<HomeWarga />} />
 
-        {token && role !== 'warga' && <Footer />}
+                            {/* Route Admin */}
+                            <Route path="/dashboard" element={role === 'warga' ? <Navigate to="/home" /> : <Dashboard />} />
+                            <Route path="/warga" element={role === 'warga' ? <Navigate to="/home" /> : <Warga />} />
+                            <Route path="/program" element={role === 'warga' ? <Navigate to="/home" /> : <Program />} />
+                            <Route path="/seleksi" element={role === 'warga' ? <Navigate to="/home" /> : <Seleksi />} />
+                            <Route path="/penyaluran" element={role === 'warga' ? <Navigate to="/home" /> : <Penyaluran />} />
+                            
+                            {/* Route Kades */}
+                            <Route path="/persetujuan" element={role === 'warga' ? <Navigate to="/home" /> : <Persetujuan />} />
+                            
+                            <Route path="/" element={role === 'warga' ? <Navigate to="/home" /> : <Navigate to="/dashboard" />} />
+                            <Route path="/login" element={<Navigate to="/" />} />
+                            <Route path="/register" element={<Navigate to="/" />} />
+                        </Routes>
+                    ) : (
+                        <Routes>
+                            <Route path="/" element={<Login />} />
+                            <Route path="/login" element={<Login />} />
+                            <Route path="/register" element={<Register />} />
+                            <Route path="*" element={<Navigate to="/login" />} />
+                        </Routes>
+                    )}
+                </div>
+
+                {token && <Footer />}
+            </main>
+        </div>
     </div>
   );
 }

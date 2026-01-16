@@ -1,105 +1,64 @@
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
-import "./Navbar.css";
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-function Navbar() {
+const Navbar = () => {
     const navigate = useNavigate();
-    const location = useLocation(); // Hook untuk tahu kita sedang di halaman mana
-    
-    // Ambil data user
-    const userString = localStorage.getItem("user");
-    const user = userString ? JSON.parse(userString) : null;
-    
-    // Cek Role User
-    const isAdmin = user?.role === 'admin'; 
-    const isKades = user?.role === 'kades'; // <--- Tambahan: Cek Kades
 
-    const handleLogout = async () => {
-        try {
-            await axios.post("http://127.0.0.1:8000/api/logout");
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            navigate("/login");
-            window.location.reload();
-        } catch (error) {
-            console.error("Gagal logout", error);
-            // Tetap paksa logout di frontend meski backend error
-            localStorage.removeItem("token");
-            navigate("/login");
+    // Ambil data user dari LocalStorage
+    let user = {};
+    try {
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+            user = JSON.parse(savedUser);
         }
-    };
+    } catch (error) {
+        console.error("Error parsing user data:", error);
+    }
 
-    // Fungsi kecil untuk cek menu aktif
-    const isActive = (path) => {
-        return location.pathname === path ? "active fw-bold" : "";
+    // Fungsi Logout
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm mb-4">
-            <div className="container">
-                {/* Logo mengarah ke Dashboard/Home */}
-                <Link className="navbar-brand fw-bold" to="/dashboard">
-                    <i className="bi bi-box-seam me-2"></i> BANSOS APP
-                </Link>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span className="navbar-toggler-icon"></span>
-                </button>
+        // Navbar Biru Full Width
+        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" style={{ zIndex: 1000 }}>
+            <div className="container-fluid px-4">
                 
-                <div className="collapse navbar-collapse" id="navbarNav">
-                    <ul className="navbar-nav me-auto">
-                        {/* 1. Menu HOME (Muncul untuk Semua User) */}
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/dashboard')}`} to="/dashboard">Home</Link>
-                        </li>
+                {/* 1. JUDUL APLIKASI (Kiri) */}
+                <Link className="navbar-brand fw-bold fs-4" to="/">
+                    BANSOS APP
+                </Link>
 
-                        {/* 2. Menu KHUSUS ADMIN */}
-                        {isAdmin && (
-                            <>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/warga')}`} to="/warga">Data Warga</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/program')}`} to="/program">Program Bantuan</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/seleksi')}`} to="/seleksi">Seleksi</Link>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/penyaluran')}`} to="/penyaluran">Penyaluran</Link>
-                                </li>
-                            </>
-                        )}
+                {/* (Menu Tengah dihapus sesuai permintaan) */}
 
-                        {/* 3. Menu KHUSUS KEPALA DESA (Baru) */}
-                        {isKades && (
-                            <li className="nav-item">
-                                <Link className={`nav-link ${isActive('/persetujuan')}`} to="/persetujuan">Validasi Data</Link>
-                            </li>
-                        )}
-                    </ul>
+                {/* 2. PROFIL & LOGOUT (Kanan) */}
+                <div className="d-flex align-items-center ms-auto">
                     
-                    <div className="d-flex align-items-center">
-                        {user && (
-                            <div className="text-white me-3 text-end d-none d-lg-block">
-                                <div className="fw-bold">{user.name}</div>
-                                <small style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-                                    {/* Logic Tampilan Role */}
-                                    {user.role === 'admin' 
-                                        ? 'Administrator' 
-                                        : user.role === 'kades' 
-                                            ? 'Kepala Desa' 
-                                            : 'Warga Desa'}
-                                </small>
-                            </div>
-                        )}
-                        <button onClick={handleLogout} className="btn btn-danger btn-sm px-3 rounded-pill">
-                            Logout
-                        </button>
+                    {/* Info User (Nama & Role) - Disembunyikan di layar HP kecil */}
+                    <div className="text-end text-white me-3 d-none d-md-block">
+                        <div className="fw-bold" style={{ fontSize: '0.9rem' }}>
+                            {user.name || 'Admin Bansos'}
+                        </div>
+                        <div className="text-white-50" style={{ fontSize: '0.75rem', textTransform: 'capitalize' }}>
+                            {user.role || 'Administrator'}
+                        </div>
                     </div>
+
+                    {/* Tombol Logout */}
+                    <button 
+                        onClick={handleLogout} 
+                        className="btn btn-danger btn-sm px-3 fw-bold"
+                    >
+                        Logout
+                    </button>
                 </div>
+
             </div>
         </nav>
     );
-}
+};
 
 export default Navbar;

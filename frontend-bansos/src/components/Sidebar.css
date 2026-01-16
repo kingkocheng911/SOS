@@ -1,0 +1,115 @@
+/* Container Utama Sidebar */
+.sidebar-container {
+  display: flex;
+  flex-direction: column;
+  
+  /* Pastikan tinggi mengikuti layar browser */
+  height: 100vh; 
+  
+  /* --- PERBAIKAN UTAMA DI SINI --- */
+  /* Padding Atas diberi 90px agar menu turun ke bawah & tidak tertabrak Navbar */
+  /* Urutan: Atas(90px) Kanan(1.5rem) Bawah(1.5rem) Kiri(1.5rem) */
+  padding: 90px 1.5rem 1.5rem 1.5rem; 
+  /* ------------------------------- */
+
+  background-color: #ffffff;
+  border-right: 1px solid #f0f0f0; /* Garis tipis di kanan */
+  
+  /* Agar sidebar tetap diam (sticky) saat halaman discroll */
+  position: sticky;
+  top: 0;
+  overflow-y: auto; /* Antisipasi jika menu terlalu panjang */
+}
+
+/* Navigasi List */
+.nav-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* Jarak antar menu */
+  /* padding-top: 1rem; <-- Hapus ini karena sudah diatur di container utama */
+  margin-bottom: auto; /* Dorong user info ke bawah */
+}
+
+/* Style Item Menu (Default) */
+.nav-item-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 12px; /* Sudut membulat */
+  color: #64748b; /* Warna teks abu-abu (slate) */
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease; /* Transisi halus */
+}
+
+/* Icon dalam menu */
+.nav-item-link i {
+  font-size: 1.2rem;
+  margin-right: 12px;
+  width: 24px;
+  text-align: center;
+}
+
+/* KETIKA DI-HOVER (Mouse menunjuk) */
+.nav-item-link:hover {
+  background-color: #f1f5f9; /* Abu-abu sangat muda */
+  color: #2563eb; /* Biru */
+  transform: translateX(4px); /* Efek geser sedikit ke kanan */
+}
+
+/* KETIKA AKTIF (Halaman sedang dibuka) */
+.nav-item-link.active {
+  background-color: #2563eb; /* Background Biru Utama */
+  color: #ffffff; /* Teks Putih */
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); /* Bayangan biru halus */
+}
+
+/* Bagian Profil User di Bawah */
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 1.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: 12px;
+  background-color: #f8fafc;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.user-info {
+  margin-left: 12px;
+  overflow: hidden;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: block;
+}

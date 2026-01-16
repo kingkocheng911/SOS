@@ -1,91 +1,136 @@
-/* NAVBAR BASE */
-.navbar {
-    background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 14px 0;
-    margin-top: 10px;
-  }
-  
-  .navbar-nav .nav-item {
-    margin-right: 14px;
-  }
-  
-  .navbar-nav .nav-link {
-    padding: 10px 18px;
-  }
-  
-  
-  /* BRAND */
-  .navbar-brand {
-    font-weight: 700;
-    color: #111827 !important;
-    font-size: 18px;
-  }
-  
-  /* NAV LINKS */
-  .navbar-nav .nav-link {
-    color: #000000 !important;
-    font-weight: 500;
-    padding: 8px 14px;
-    border-radius: 10px;
-    transition: background 0.2s ease, color 0.2s ease;
-  }
-  
-  /* HOVER */
-  .navbar-nav .nav-link:hover {
-    background: #f3f4f6;
-    color: #111827 !important;
-  }
-  
-  .navbar-nav .nav-link.active {
-    background: #eef2ff;
-    color: #4f46e5 !important;
-    font-weight: 500;
-  }
-  
-  
-  /* USER INFO */
-  .navbar .text-white {
-    color: #111827 !important;
-  }
-  
-  .navbar small {
-    color: #6b7280;
-  }
-  
-  /* LOGOUT BUTTON */
-  .navbar .btn-danger {
-    background: #ef4444;
-    border: none;
-    font-weight: 500;
-    transition: background 0.2s ease;
-  }
-  
-  .navbar .btn-danger:hover {
-    background: #dc2626;
-  }
-  
-  /* TOGGLER */
-  .navbar-toggler {
-    border: none;
-  }
-  
-  .navbar-toggler:focus {
-    box-shadow: none;
-  }
+/* --- CONTAINER UTAMA --- */
+.admin-navbar {
+    background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%); /* Biru Modern */
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
 
-  
-  /* Fix nav item biar nggak geser saat diklik */
-.navbar-nav .nav-link {
-    box-sizing: border-box;
+/* --- BAGIAN KIRI: BRAND/LOGO --- */
+.navbar-brand-custom {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 180px; /* Menjaga area kiri agar menu tetap di tengah */
+}
+
+/* --- BAGIAN TENGAH: MENU (PENTING) --- */
+.navbar-menu-group {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Jarak antar tombol menu */
+    flex-grow: 1;
+    justify-content: center; /* Kunci agar menu ada di tengah layar */
+}
+
+/* Style Link Menu */
+.nav-item-custom {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 8px 20px;
+    border-radius: 50px; /* Bentuk Pill/Lonjong */
+    transition: all 0.3s ease;
+}
+
+.nav-item-custom:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Status Aktif (Sedang dibuka) */
+.nav-item-custom.active {
+    background-color: #ffffff;
+    color: #1d4ed8; /* Teks jadi biru */
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* --- BAGIAN KANAN: PROFIL & LOGOUT --- */
+.navbar-profile-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    min-width: 180px; /* Menjaga keseimbangan kanan */
+}
+
+.user-info {
+    text-align: right;
     line-height: 1.2;
-  }
-  
-  .navbar-nav .nav-link:focus,
-  .navbar-nav .nav-link:active {
-    outline: none;
-    box-shadow: none;
-    transform: none;
-  }
-  
-  
+    color: white;
+}
+
+.user-name {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.user-role {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+.btn-logout-custom {
+    background-color: #ef4444; /* Merah Soft */
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-logout-custom:hover {
+    background-color: #dc2626;
+}
+
+/* --- RESPONSIVE (HP) --- */
+@media (max-width: 992px) {
+    .admin-navbar {
+        padding: 0 15px;
+        height: auto;
+        flex-wrap: wrap;
+        padding-bottom: 10px;
+    }
+
+    .navbar-brand-custom {
+        margin-bottom: 10px;
+    }
+
+    /* Di HP, menu jadi scroll ke samping agar muat */
+    .navbar-menu-group {
+        order: 3; /* Pindah ke bawah */
+        width: 100%;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 5px;
+        white-space: nowrap;
+    }
+    
+    .navbar-profile-group {
+        width: auto;
+        margin-left: auto;
+    }
+    
+    .user-info {
+        display: none; /* Sembunyikan nama di HP biar tidak sempit */
+    }
+}

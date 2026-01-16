@@ -13,11 +13,12 @@ return new class extends Migration
     {
         Schema::create('notifikasis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Link ke user
-            $table->string('judul');
+            $table->unsignedBigInteger('user_id'); // ID Warga yang menerima notif
             $table->text('pesan');
-            $table->boolean('sudah_dibaca')->default(false);
+            $table->boolean('is_read')->default(false);
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

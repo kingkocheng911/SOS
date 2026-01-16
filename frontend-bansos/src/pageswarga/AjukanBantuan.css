@@ -1,0 +1,169 @@
+/* --- CONTAINER UTAMA --- */
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto;
+    position: relative;
+}
+
+/* Modifikasi container jika dalam mode Warning */
+.form-container.warning-mode {
+    max-width: 600px;
+    text-align: center;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+/* --- TYPOGRAPHY HEADER --- */
+.form-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #f3f4f6;
+    padding-bottom: 20px;
+}
+
+.header-icon-box {
+    background-color: rgba(37, 99, 235, 0.1); /* Biru transparan */
+    padding: 10px;
+    border-radius: 8px;
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #111827;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.form-subtitle {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 400;
+    margin: 0;
+}
+
+/* --- INPUT STYLES --- */
+.input-group {
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.modern-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    background-color: #ffffff;
+    color: #1f2937;
+    font-family: inherit;
+}
+
+/* Efek Focus */
+.modern-input:focus {
+    background-color: white;
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Style Khusus Read Only (Nama & NIK) */
+.modern-input.read-only {
+    background-color: #f3f4f6;
+    cursor: not-allowed;
+    color: #6b7280;
+    border-color: #e5e7eb;
+}
+
+.modern-input.read-only:focus {
+    box-shadow: none;
+    border-color: #e5e7eb;
+}
+
+/* TextArea Helper Text */
+.input-helper {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+/* --- BUTTON STYLES --- */
+.btn-primary-gradient {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(to right, #2563eb, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-primary-gradient:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+}
+
+.btn-primary-gradient:disabled {
+    opacity: 0.7;
+    cursor: wait;
+    transform: none;
+}
+
+/* --- WARNING STATE (PROFIL BELUM LENGKAP) --- */
+.warning-icon-wrapper {
+    background-color: rgba(245, 158, 11, 0.1); /* Kuning transparan */
+    display: inline-flex;
+    padding: 1.5rem;
+    border-radius: 50%;
+    margin-bottom: 1.5rem;
+}
+
+.warning-icon {
+    font-size: 3rem;
+    color: #f59e0b; /* Warna Warning Bootstrap */
+}
+
+.warning-title {
+    color: #1f2937;
+    font-weight: 800;
+    margin-bottom: 1rem;
+}
+
+.warning-text {
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 0 1rem;
+}
+
+.btn-warning-action {
+    max-width: 250px;
+    margin: 0 auto;
+}

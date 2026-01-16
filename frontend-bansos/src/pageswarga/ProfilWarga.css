@@ -1,0 +1,239 @@
+/* --- GLOBAL VARIABLES & THEME --- */
+:root {
+    --primary-dark: #0f172a;   /* Midnight Blue (Sangat Gelap) */
+    --primary-light: #1e293b;  /* Slate 800 (Agak Terang dikit) */
+    --accent-blue: #3b82f6;    /* Royal Blue untuk sorotan */
+    --text-main: #1e293b;      /* Warna teks utama (Hampir hitam) */
+    --text-muted: #64748b;     /* Warna teks sekunder (Abu-abu tenang) */
+    --bg-page: #f8fafc;        /* Background halaman (Putih keabuan bersih) */
+    --white: #ffffff;
+}
+
+/* Container Utama */
+.profile-page-container {
+    background-color: var(--bg-page);
+    min-height: 80vh;
+    padding-bottom: 3rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* --- 1. COVER HEADER (Gradient Gelap Mewah) --- */
+.profile-cover {
+    /* Gradient yang sama dengan nuansa Navbar Anda */
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
+    height: 180px;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* --- 2. FOTO PROFIL (Mengambang) --- */
+.profile-pic-container {
+    position: absolute;
+    bottom: -60px; /* Membuat foto menembus batas header */
+    left: 40px;
+    z-index: 10;
+}
+
+.profile-pic {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--white); /* Border putih tebal pemisah */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); /* Bayangan lembut */
+    background-color: var(--primary-light);
+}
+
+/* Tombol Kamera Kecil */
+.btn-upload-cam {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background-color: var(--primary-dark);
+    color: var(--white);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid var(--white);
+}
+
+.btn-upload-cam:hover {
+    background-color: var(--accent-blue);
+    transform: scale(1.1);
+}
+
+/* --- 3. TOMBOL EDIT (Floating) --- */
+.btn-edit-floating {
+    margin: 20px;
+    background-color: rgba(255, 255, 255, 0.1); /* Transparan kaca */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--white);
+    backdrop-filter: blur(4px);
+    transition: all 0.3s;
+}
+
+.btn-edit-floating:hover {
+    background-color: var(--white);
+    color: var(--primary-dark);
+}
+
+/* --- 4. CARD KONTEN UTAMA --- */
+.profile-details-card {
+    background: var(--white);
+    border-radius: 0 0 12px 12px;
+    padding: 80px 40px 40px 40px; /* Padding atas besar untuk kompensasi foto */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    border: 1px solid #e2e8f0;
+}
+
+/* Typography Nama & Role */
+.user-name-large {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    letter-spacing: -0.5px;
+}
+
+.user-role-text {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+/* --- 5. GRID INFO (Tampilan Baca) --- */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.info-item label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.info-item p {
+    font-size: 1.1rem;
+    color: var(--text-main);
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Highlight Khusus */
+.text-highlight {
+    color: var(--primary-dark);
+    font-weight: 700 !important;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+/* --- 6. FORM STYLING (Mode Edit) --- */
+.form-section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+    margin-top: 1rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #cbd5e1;
+    padding: 0.6rem 1rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    transition: all 0.2s;
+    background-color: #f8fafc;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* Glow biru tenang */
+    background-color: var(--white);
+}
+
+.form-label-custom {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+/* Area Alamat */
+.address-box {
+    background-color: #f1f5f9;
+    border: 1px dashed #94a3b8;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+/* Checkbox Style */
+.form-check-input {
+    width: 1.2em;
+    height: 1.2em;
+    margin-top: 0.2em;
+    cursor: pointer;
+}
+
+/* Tombol Aksi */
+.btn-save-custom {
+    background-color: var(--primary-dark);
+    color: var(--white);
+    padding: 10px 30px;
+    border-radius: 8px;
+    font-weight: 600;
+    border: none;
+    transition: all 0.3s;
+}
+
+.btn-save-custom:hover {
+    background-color: var(--accent-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn-cancel-custom {
+    background-color: transparent;
+    border: 1px solid #cbd5e1;
+    color: var(--text-muted);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-cancel-custom:hover {
+    background-color: #f1f5f9;
+    color: var(--text-main);
+}
+
+/* Tombol Edit Melayang di Header */
+.btn-edit-floating {
+    z-index: 20;
+    margin: 1.5rem !important; /* Pengganti m-4 */
+}
+
+/* Agar Alamat mengambil lebar penuh di grid */
+.info-item-full {
+    grid-column: 1 / -1; /* Melebar dari kiri ke kanan */
+}
