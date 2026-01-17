@@ -14,11 +14,15 @@ import Program from "./pagesadmin/Program";
 import Seleksi from "./pagesadmin/Seleksi";
 import Penyaluran from "./pagesadmin/Penyaluran";
 
-// IMPORT KADES
-import Persetujuan from "./pageskades/Persetujuan"; 
+// IMPORT KADES 
+import DashboardKades from "./pageskades/DashboardKades"; // Tambahkan ini
+import PersetujuanKades from "./pageskades/Persetujuan"; 
 
 // IMPORT WARGA
 import HomeWarga from "./pageswarga/HomeWarga"; 
+import BerandaWarga from "./pageswarga/BerandaWarga";
+import AjukanBantuan from "./pageswarga/AjukanBantuan";
+import ProfilWarga from "./pageswarga/ProfilWarga";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -39,16 +43,15 @@ function App() {
 
         <div className="d-flex flex-grow-1" style={{ overflow: 'hidden' }}>
             
-            {/* === BAGIAN SIDEBAR (KIRI) YANG DIEDIT === */}
+            {/* === SIDEBAR (KIRI) === */}
             {token && (
                 <div style={{ 
                     width: '250px', 
                     flexShrink: 0, 
                     backgroundColor: '#fff', 
                     borderRight: '1px solid #dee2e6',
-                    // PERUBAHAN DI SINI:
-                    overflow: 'hidden', // Menghilangkan semua scrollbar (Kanan & Bawah)
-                    display: 'flex',    // Memastikan isi sidebar rapi
+                    overflow: 'hidden', 
+                    display: 'flex',
                     flexDirection: 'column'
                 }}>
                     <Sidebar />
@@ -57,7 +60,7 @@ function App() {
 
             {/* === MAIN CONTENT (KANAN) === */}
             <main className="flex-grow-1 d-flex flex-column" style={{ 
-                overflowY: 'auto', // Hanya bagian kanan yang boleh di-scroll
+                overflowY: 'auto', 
                 backgroundColor: '#f8f9fa' 
             }}>
                 
@@ -65,8 +68,11 @@ function App() {
                     {token ? (
                         <Routes>
                             {/* Route Warga */}
-                            <Route path="/home" element={<HomeWarga />} />
-
+                            <Route path="/home" element={<HomeWarga page="beranda" />} />
+                            <Route path="/ajukan" element={<HomeWarga page="ajukan" />} />
+                            <Route path="/profil-warga" element={<HomeWarga page="profil" />} />
+                            <Route path="/notifikasi" element={<HomeWarga page="notifikasi" />} />
+                            
                             {/* Route Admin */}
                             <Route path="/dashboard" element={role === 'warga' ? <Navigate to="/home" /> : <Dashboard />} />
                             <Route path="/warga" element={role === 'warga' ? <Navigate to="/home" /> : <Warga />} />
@@ -75,11 +81,19 @@ function App() {
                             <Route path="/penyaluran" element={role === 'warga' ? <Navigate to="/home" /> : <Penyaluran />} />
                             
                             {/* Route Kades */}
-                            <Route path="/persetujuan" element={role === 'warga' ? <Navigate to="/home" /> : <Persetujuan />} />
+                            <Route path="/kades/dashboard" element={role === 'kades' ? <DashboardKades /> : <Navigate to="/" />} />
+                            <Route path="/kades/persetujuan" element={role === 'kades' ? <PersetujuanKades /> : <Navigate to="/" />} />
                             
-                            <Route path="/" element={role === 'warga' ? <Navigate to="/home" /> : <Navigate to="/dashboard" />} />
+                            {/* Default Redirects */}
+                            <Route path="/" element={
+                                role === 'warga' ? <Navigate to="/home" /> : 
+                                role === 'kades' ? <Navigate to="/kades/dashboard" /> : 
+                                <Navigate to="/dashboard" />
+                            } />
+                            
                             <Route path="/login" element={<Navigate to="/" />} />
                             <Route path="/register" element={<Navigate to="/" />} />
+                            <Route path="*" element={<Navigate to="/" />} />
                         </Routes>
                     ) : (
                         <Routes>

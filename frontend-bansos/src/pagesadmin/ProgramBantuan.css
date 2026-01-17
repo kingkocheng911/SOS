@@ -1,0 +1,138 @@
+.program-page-container {
+    padding: 20px;
+    background-color: #f8fafc;
+}
+
+.custom-card-navy {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.custom-card-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    padding: 20px 25px;
+}
+
+.card-subtitle-text {
+    color: #e2e8f0;
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.custom-card-body {
+    padding: 25px;
+}
+
+/* --- PERBAIKAN POSISI TEKS AGAR TIDAK NABRAK --- */
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon-left {
+    position: absolute;
+    left: 15px;
+    color: #94a3b8;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.currency-label {
+    position: absolute;
+    left: 15px;
+    font-weight: 700;
+    color: #64748b;
+    z-index: 10;
+}
+
+.custom-input {
+    padding-left: 45px !important; /* Memberi ruang di kiri agar teks tidak nabrak ikon */
+    height: 45px;
+    border-radius: 8px;
+    border: 1.5px solid #e2e8f0;
+}
+
+/* Khusus untuk input yang ada tulisan "Rp" agar geser lebih jauh */
+.input-shift {
+    padding-left: 55px !important;
+}
+
+.custom-input-area {
+    padding: 12px 15px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.custom-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+}
+
+/* --- BUTTONS --- */
+.btn-modern-primary {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-modern-warn { background: #f59e0b; }
+.btn-modern-danger { background: #ef4444; color: white; border: none; padding: 10px 20px; border-radius: 8px; }
+.btn-modern-outline { background: white; border: 1.5px solid #e2e8f0; padding: 10px 20px; border-radius: 8px; }
+
+/* --- TABLE --- */
+.table-modern-style thead th {
+    background: #f1f5f9;
+    padding: 15px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.criteria-pills-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pill-item {
+    background: #eff6ff;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    width: fit-content;
+}
+
+.btn-action-edit {
+    background: #f1f5f9;
+    border: none;
+    padding: 8px;
+    border-radius: 6px;
+    color: #2563eb;
+}
+
+.btn-mode-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid white;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Hilangkan panah naik turun di input number */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

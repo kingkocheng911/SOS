@@ -51,5 +51,9 @@ class User extends Authenticatable
         // Relasi ke tabel seleksi
         return $this->hasMany(Seleksi::class, 'warga_id');
     }
+
+   public function warga() {
+    return $this->hasOne(Warga::class, 'user_id', 'id');
+}
 }
 

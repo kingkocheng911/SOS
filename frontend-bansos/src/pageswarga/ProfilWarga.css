@@ -1,239 +1,184 @@
-/* --- GLOBAL VARIABLES & THEME --- */
-:root {
-    --primary-dark: #0f172a;   /* Midnight Blue (Sangat Gelap) */
-    --primary-light: #1e293b;  /* Slate 800 (Agak Terang dikit) */
-    --accent-blue: #3b82f6;    /* Royal Blue untuk sorotan */
-    --text-main: #1e293b;      /* Warna teks utama (Hampir hitam) */
-    --text-muted: #64748b;     /* Warna teks sekunder (Abu-abu tenang) */
-    --bg-page: #f8fafc;        /* Background halaman (Putih keabuan bersih) */
-    --white: #ffffff;
-}
-
 /* Container Utama */
-.profile-page-container {
-    background-color: var(--bg-page);
-    min-height: 80vh;
-    padding-bottom: 3rem;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+.profile-container-modern {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    overflow: hidden;
+    margin: 20px auto;
 }
 
-/* --- 1. COVER HEADER (Gradient Gelap Mewah) --- */
-.profile-cover {
-    /* Gradient yang sama dengan nuansa Navbar Anda */
-    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-light) 100%);
-    height: 180px;
-    border-radius: 12px 12px 0 0;
+/* Banner Atas */
+.profile-banner {
+    height: 140px;
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
     position: relative;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 20px;
 }
 
-/* --- 2. FOTO PROFIL (Mengambang) --- */
-.profile-pic-container {
-    position: absolute;
-    bottom: -60px; /* Membuat foto menembus batas header */
-    left: 40px;
+/* Kolom Foto Kiri */
+.profile-sidebar {
+    background: #fcfcfc;
+    border-right: 1px solid #f1f5f9;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.avatar-container-left {
+    margin-top: -80px; /* Tarik foto ke atas menembus banner */
+    position: relative;
     z-index: 10;
 }
 
-.profile-pic {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid var(--white); /* Border putih tebal pemisah */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2); /* Bayangan lembut */
-    background-color: var(--primary-light);
+.avatar-wrapper {
+    width: 180px;
+    height: 180px;
+    border-radius: 20px; /* Bentuk kotak membulat modern */
+    background: white;
+    padding: 6px;
+    position: relative;
 }
 
-/* Tombol Kamera Kecil */
-.btn-upload-cam {
+.img-profile-left {
+    width: 100%;
+    height: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+}
+
+.upload-badge {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    background-color: var(--primary-dark);
-    color: var(--white);
-    width: 36px;
-    height: 36px;
+    bottom: -10px;
+    right: -10px;
+    background: #3b82f6;
+    color: white;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
-    border: 2px solid var(--white);
+    border: 3px solid white;
+    transition: transform 0.2s;
 }
 
-.btn-upload-cam:hover {
-    background-color: var(--accent-blue);
-    transform: scale(1.1);
+.upload-badge:hover { transform: scale(1.1); }
+
+/* Kolom Detail Kanan */
+.profile-details-area {
+    padding: 30px 40px;
+    background: white;
 }
 
-/* --- 3. TOMBOL EDIT (Floating) --- */
-.btn-edit-floating {
-    margin: 20px;
-    background-color: rgba(255, 255, 255, 0.1); /* Transparan kaca */
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: var(--white);
-    backdrop-filter: blur(4px);
-    transition: all 0.3s;
+.profile-info-header {
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f8fafc;
+    padding-bottom: 15px;
 }
 
-.btn-edit-floating:hover {
-    background-color: var(--white);
-    color: var(--primary-dark);
-}
-
-/* --- 4. CARD KONTEN UTAMA --- */
-.profile-details-card {
-    background: var(--white);
-    border-radius: 0 0 12px 12px;
-    padding: 80px 40px 40px 40px; /* Padding atas besar untuk kompensasi foto */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-    border: 1px solid #e2e8f0;
-}
-
-/* Typography Nama & Role */
-.user-name-large {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--primary-dark);
-    letter-spacing: -0.5px;
-}
-
-.user-role-text {
-    font-size: 0.95rem;
-    color: var(--text-muted);
-    margin-top: 4px;
-    font-weight: 500;
-}
-
-/* --- 5. GRID INFO (Tampilan Baca) --- */
-.info-grid {
+/* Grid Info (View Mode) */
+.info-grid-modern {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #e2e8f0;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
-.info-item label {
-    display: block;
-    font-size: 0.75rem;
+.info-item-card {
+    background: #f8fafc;
+    padding: 15px 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.info-item-card:hover {
+    background: #f1f5f9;
+    transform: translateX(5px);
+}
+
+.icon-circle {
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+    font-size: 1.2rem;
+    margin-right: 15px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+.info-label-group label {
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-}
-
-.info-item p {
-    font-size: 1.1rem;
-    color: var(--text-main);
-    font-weight: 500;
-    margin: 0;
-}
-
-/* Highlight Khusus */
-.text-highlight {
-    color: var(--primary-dark);
-    font-weight: 700 !important;
-}
-
-.full-width {
-    grid-column: 1 / -1;
-}
-
-/* --- 6. FORM STYLING (Mode Edit) --- */
-.form-section-title {
-    font-size: 1rem;
+    color: #64748b;
     font-weight: 700;
-    color: var(--primary-dark);
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
-    margin-top: 1rem;
+    margin-bottom: 2px;
+    display: block;
 }
 
-.form-control, .form-select {
-    border: 1px solid #cbd5e1;
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    color: var(--text-main);
-    transition: all 0.2s;
-    background-color: #f8fafc;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--accent-blue);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* Glow biru tenang */
-    background-color: var(--white);
-}
-
-.form-label-custom {
-    font-size: 0.85rem;
+.info-label-group p {
+    margin: 0;
     font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: 6px;
+    color: #1e293b;
 }
 
-/* Area Alamat */
-.address-box {
-    background-color: #f1f5f9;
-    border: 1px dashed #94a3b8;
-    border-radius: 8px;
-    padding: 1.5rem;
+.full-width { grid-column: span 2; }
+
+/* Status Badges */
+.status-badge-modern {
+    padding: 6px 15px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+.status-badge-modern.active { background: #dcfce7; color: #166534; }
+.status-badge-modern.inactive { background: #f1f5f9; color: #475569; }
+
+/* Edit Form Elements */
+.custom-input {
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    padding: 10px 15px;
 }
 
-/* Checkbox Style */
-.form-check-input {
-    width: 1.2em;
-    height: 1.2em;
-    margin-top: 0.2em;
-    cursor: pointer;
+.address-edit-box {
+    background: #f1f5f9;
+    padding: 20px;
+    border-radius: 15px;
 }
 
-/* Tombol Aksi */
-.btn-save-custom {
-    background-color: var(--primary-dark);
-    color: var(--white);
-    padding: 10px 30px;
-    border-radius: 8px;
-    font-weight: 600;
-    border: none;
-    transition: all 0.3s;
+/* Buttons */
+.btn-edit-glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 18px;
+    border-radius: 10px;
+    float: right;
+    transition: 0.3s;
 }
 
-.btn-save-custom:hover {
-    background-color: var(--accent-blue);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
+.btn-edit-glass:hover { background: white; color: #0f172a; }
 
-.btn-cancel-custom {
-    background-color: transparent;
-    border: 1px solid #cbd5e1;
-    color: var(--text-muted);
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s;
+/* Animations */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
+.animate-fade-in { animation: fadeInUp 0.5s ease; }
+.animate-slide-up { animation: fadeInUp 0.5s ease backwards; }
 
-.btn-cancel-custom:hover {
-    background-color: #f1f5f9;
-    color: var(--text-main);
-}
-
-/* Tombol Edit Melayang di Header */
-.btn-edit-floating {
-    z-index: 20;
-    margin: 1.5rem !important; /* Pengganti m-4 */
-}
-
-/* Agar Alamat mengambil lebar penuh di grid */
-.info-item-full {
-    grid-column: 1 / -1; /* Melebar dari kiri ke kanan */
+/* Responsive */
+@media (max-width: 767px) {
+    .profile-sidebar { border-right: none; border-bottom: 1px solid #eee; }
+    .avatar-container-left { margin-top: -60px; margin-bottom: 20px; }
+    .info-grid-modern { grid-template-columns: 1fr; }
+    .full-width { grid-column: span 1; }
 }

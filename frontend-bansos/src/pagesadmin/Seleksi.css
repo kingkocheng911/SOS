@@ -1,0 +1,121 @@
+/* Seleksi.css */
+.seleksi-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 1.5rem;
+}
+
+/* Typography & Headers */
+.header-title {
+    font-weight: 800;
+    color: #1a1d23;
+    margin-bottom: 0.25rem;
+}
+
+.header-subtitle {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+/* Cards Modernization */
+.custom-card {
+    border: none !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden;
+    background: white;
+}
+
+.custom-card-header {
+    background-color: white !important;
+    border-bottom: 1px solid #f0f0f0 !important;
+    padding: 1rem 1.25rem !important;
+}
+
+/* Inputs & Selects */
+.custom-select {
+    border: 2px solid #edf2f7 !important;
+    border-radius: 0.75rem !important;
+    padding: 0.6rem 1rem !important;
+    transition: border-color 0.2s ease;
+}
+
+.custom-select:focus {
+    border-color: #0d6efd !important;
+    box-shadow: none !important;
+}
+
+/* Table Styling */
+.modern-table thead th {
+    background-color: #fcfcfc;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0 !important;
+}
+
+.modern-table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid #f8fafc;
+    vertical-align: middle;
+}
+
+.modern-table tbody tr:hover {
+    background-color: #f8fbff;
+}
+
+/* Stats Box */
+.stats-box {
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.stats-icon-wrapper {
+    background-color: rgba(13, 110, 253, 0.1);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+/* Badges Custom */
+.badge-soft-success {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+    color: #198754 !important;
+}
+
+.badge-soft-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+    color: #997404 !important;
+}
+
+.badge-soft-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+    color: #dc3545 !important;
+}
+
+.rounded-pill-custom {
+    padding: 0.4rem 1rem !important;
+    font-weight: 700 !important;
+    font-size: 10px !important;
+}
+
+/* Helper Alert Box */
+.info-box {
+    background-color: #f1f5f9;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid #0d6efd;
+}
+
+.custom-card-header {
+       color: white !important;
+}
+
+.custom-card-header span, 
+.custom-card-header div,
+.custom-card-header .fw-bold {
+    color: white !important;
+}

@@ -1,55 +1,138 @@
-/* Styling Card & Layout */
-.persetujuan-header {
-  background-color: #0d6efd; /* Bootstrap Primary Blue */
-  color: white;
+/* Navy Gradient Header */
+.custom-card-header {
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+    padding: 20px 25px;
+    border: none;
 }
 
-.empty-state-icon {
-  font-size: 3rem;
-  color: #6c757d;
-  opacity: 0.5;
+/* Stats Badge */
+.stats-badge {
+    background: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #1e3a8a;
+    border: 1px solid #e2e8f0;
 }
 
-/* Styling Table */
-.cursor-pointer {
-  cursor: pointer;
-  transition: background-color 0.2s ease;
+/* Search Wrapper */
+.search-wrapper {
+    position: relative;
+    width: 300px;
 }
 
-.col-action-width {
-  width: 150px;
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
 }
 
-/* Styling Checkbox Custom */
+.search-input {
+    padding-left: 40px !important;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.9rem;
+}
+
+/* Table Modern */
+.table-modern thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    padding: 15px;
+    border-bottom: 2px solid #f1f5f9;
+}
+
+.row-hoverable {
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.row-hoverable:hover {
+    background-color: #f8fafc;
+}
+
+/* Detail Trigger Text */
+.detail-trigger {
+    font-size: 0.75rem;
+    color: #3b82f6;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* Custom Checkbox */
 .custom-checkbox {
-  cursor: pointer;
-  width: 18px;
-  height: 18px;
+    width: 1.2rem;
+    height: 1.2rem;
+    cursor: pointer;
+    border: 2px solid #cbd5e1;
 }
 
-.custom-checkbox-lg {
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
+.custom-checkbox:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
 }
 
-/* Styling Badge Custom (Biru Muda) */
-.badge-custom-blue {
-  background-color: #e7f1ff; /* Biru sangat muda */
-  color: #0d6efd; /* Biru text */
-  border: 1px solid #cff4fc;
-  padding: 0.5rem 1rem;
-  border-radius: 50rem; /* Pill shape */
-  font-weight: 500;
+/* Badge Program */
+.badge-program {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
 }
 
-/* Tombol Tolak (Outline Merah jadi Merah Penuh saat Hover) */
-.btn-hover-danger {
-  transition: all 0.3s ease;
+/* Action Buttons */
+.btn-action-success {
+    background: #ffffff;
+    color: #15803d;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
 }
 
-.btn-hover-danger:hover {
-  background-color: #dc3545; /* Merah */
-  border-color: #dc3545;
-  color: white !important;
+.btn-action-success:hover {
+    background: #f0fdf4;
+    transform: translateY(-1px);
+}
+
+.btn-action-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
+
+.btn-action-danger:hover {
+    background: #dc2626;
+}
+
+.card-footer-custom {
+    padding: 15px 25px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    font-size: 0.85rem;
+    color: #64748b;
 }

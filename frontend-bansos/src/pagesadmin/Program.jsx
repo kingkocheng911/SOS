@@ -1,11 +1,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  PlusCircle, 
+  Edit3, 
+  Trash2, 
+  Info, 
+  CircleDollarSign, 
+  Users, 
+  ChevronRight,
+  Settings2,
+  XCircle
+} from "lucide-react";
+import "./ProgramBantuan.css";
 
 function ProgramBantuan() {
-  // State Data
   const [listProgram, setListProgram] = useState([]);
-  
-  // State Form
   const [formData, setFormData] = useState({
     nama_program: "",
     deskripsi: "",
@@ -13,14 +23,10 @@ function ProgramBantuan() {
     minimal_tanggungan: ""    
   });
 
-  // State Mode
   const [editId, setEditId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  // State Tampilan Tombol Aksi di Tabel
   const [modeKelola, setModeKelola] = useState(false);
 
-  // Ambil data awal
   useEffect(() => {
     fetchData();
   }, []);
@@ -47,8 +53,13 @@ function ProgramBantuan() {
       minimal_tanggungan: item.minimal_tanggungan || ""
     });
     setEditId(item.id);
-    // Scroll otomatis ke atas agar user melihat form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    const mainContent = document.querySelector('main');
+    if (mainContent) {
+        mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleCancel = () => {
@@ -56,17 +67,15 @@ function ProgramBantuan() {
     setEditId(null);
   };
 
-  // Fungsi Hapus (Sekarang dipanggil dari Form, bukan Tabel)
   const handleDelete = async () => {
-    if(!editId) return; // Pastikan ada ID yang sedang diedit
-    
-    if(!window.confirm("PERINGATAN: Apakah Anda yakin ingin MENGHAPUS program ini secara permanen?")) return;
+    if(!editId) return;
+    if(!window.confirm("Hapus program ini secara permanen?")) return;
 
     try {
         await axios.delete(`http://127.0.0.1:8000/api/program/${editId}`);
         alert("Program berhasil dihapus.");
-        handleCancel(); // Reset form
-        fetchData();    // Refresh data
+        handleCancel();
+        fetchData();
     } catch (error) {
         alert("Gagal menghapus data.");
     }
@@ -92,136 +101,162 @@ function ProgramBantuan() {
       handleCancel();
       fetchData();
     } catch (error) {
-      console.error(error);
       alert("Gagal menyimpan.");
     }
     setIsLoading(false);
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Kelola Program Bantuan</h2>
-
-      {/* --- FORMULIR INPUT / EDIT --- */}
-      <div className={`card shadow-sm mb-5 border-${editId ? 'warning' : 'success'}`}>
-        <div className={`card-header text-white ${editId ? 'bg-warning' : 'bg-success'}`}>
-          <h5 className="mb-0">{editId ? "Edit Program Bantuan" : "Tambah Program Baru"}</h5>
+    <motion.div 
+      initial={{ opacity: 0 }} 
+      animate={{ opacity: 1 }} 
+      className="program-page-container"
+    >
+      {/* --- SECTION FORMULIR --- */}
+      <motion.div 
+        layout
+        className={`custom-card-navy ${editId ? 'border-edit-active' : ''}`}
+      >
+        <div className="custom-card-header">
+          <div className="header-info">
+            <div className="d-flex align-items-center gap-2">
+              {editId ? <Edit3 size={20}/> : <PlusCircle size={20}/>}
+              <h5 className="m-0 text-white">{editId ? "Mode Edit Program" : "Tambah Program Baru"}</h5>
+            </div>
+            <p className="card-subtitle-text">
+              {editId ? "Sedang mengubah parameter program bantuan" : "Input parameter untuk seleksi otomatis warga"}
+            </p>
+          </div>
         </div>
-        <div className="card-body">
+        
+        <div className="custom-card-body">
           <form onSubmit={handleSubmit}>
-            <div className="mb-3">
-              <label className="fw-bold">Nama Program</label>
-              <input type="text" name="nama_program" className="form-control" value={formData.nama_program} onChange={handleChange} required placeholder="Contoh: BLT 2024" />
-            </div>
-            <div className="mb-3">
-              <label className="fw-bold">Deskripsi</label>
-              <textarea name="deskripsi" className="form-control" rows="2" value={formData.deskripsi} onChange={handleChange} placeholder="Deskripsi singkat..."></textarea>
-            </div>
-            
-            <h6 className="mt-3 text-muted">Syarat Otomatis (Opsional)</h6>
             <div className="row">
-              <div className="col-md-6 mb-3">
-                <label>Max Penghasilan (Rp)</label>
-                <input type="number" name="maksimal_penghasilan" className="form-control" value={formData.maksimal_penghasilan} onChange={handleChange} placeholder="0" />
-              </div>
-              <div className="col-md-6 mb-3">
-                <label>Min Tanggungan (Orang)</label>
-                <input type="number" name="minimal_tanggungan" className="form-control" value={formData.minimal_tanggungan} onChange={handleChange} placeholder="0" />
-              </div>
-            </div>
-
-            {/* --- TOMBOL AKSI DI DALAM FORM --- */}
-            <div className="d-flex justify-content-between align-items-center mt-3">
-                {/* Grup Tombol Simpan & Batal */}
-                <div className="d-flex gap-2">
-                    <button type="submit" className={`btn ${editId ? 'btn-warning' : 'btn-success'} text-white`} disabled={isLoading}>
-                        {isLoading ? "Proses..." : (editId ? "💾 Simpan Perubahan" : "➕ Tambah Program")}
-                    </button>
-                    
-                    {editId && (
-                        <button type="button" className="btn btn-secondary" onClick={handleCancel}>
-                            Batal
-                        </button>
-                    )}
+              <div className="col-md-12 mb-4">
+                <label className="custom-label">Nama Program</label>
+                <div className="input-with-icon">
+                  <ChevronRight className="input-icon-left" size={18} />
+                  <input type="text" name="nama_program" className="form-control custom-input" value={formData.nama_program} onChange={handleChange} required placeholder="Contoh: Bantuan Sembako Ramadhan" />
                 </div>
-
-                {/* TOMBOL HAPUS (Hanya muncul saat Mode Edit) */}
-                {editId && (
-                    <button type="button" className="btn btn-danger" onClick={handleDelete}>
-                        🗑️ Hapus Program Ini
-                    </button>
-                )}
+              </div>
+              <div className="col-md-12 mb-4">
+                <label className="custom-label">Deskripsi Program</label>
+                <textarea name="deskripsi" className="form-control custom-input-area" rows="3" value={formData.deskripsi} onChange={handleChange} placeholder="Jelaskan detail bantuan ini..."></textarea>
+              </div>
+              <div className="col-md-6 mb-4">
+                <label className="custom-label">Maksimal Penghasilan</label>
+                <div className="input-with-icon">
+                  <span className="currency-label">Rp</span>
+                  <input type="number" name="maksimal_penghasilan" className="form-control custom-input input-shift" value={formData.maksimal_penghasilan} onChange={handleChange} placeholder="0" />
+                </div>
+              </div>
+              <div className="col-md-6 mb-4">
+                <label className="custom-label">Minimal Tanggungan</label>
+                <div className="input-with-icon">
+                  <Users className="input-icon-left" size={18} />
+                  <input type="number" name="minimal_tanggungan" className="form-control custom-input" value={formData.minimal_tanggungan} onChange={handleChange} placeholder="Jumlah Orang" />
+                </div>
+              </div>
             </div>
 
+            <div className="form-footer-actions">
+              <div className="d-flex gap-2">
+                <button type="submit" className={`btn-modern-primary ${editId ? 'btn-modern-warn' : ''}`} disabled={isLoading}>
+                  {isLoading ? <span className="spinner-border spinner-border-sm me-2"></span> : null}
+                  {editId ? "Perbarui Data" : "Simpan Program"}
+                </button>
+                {editId && (
+                  <button type="button" className="btn-modern-outline" onClick={handleCancel}>
+                    <XCircle size={18} className="me-1"/> Batal
+                  </button>
+                )}
+              </div>
+              {editId && (
+                <button type="button" className="btn-modern-danger" onClick={handleDelete}>
+                  <Trash2 size={18} className="me-1"/> Hapus Program
+                </button>
+              )}
+            </div>
           </form>
         </div>
-      </div>
+      </motion.div>
 
-      {/* --- TABEL DATA --- */}
-      <div className="card shadow-sm">
-        <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-          <span className="fw-bold fs-5">Daftar Program Tersedia</span>
-          
-          {/* Tombol Toggle Pengaturan */}
+      {/* --- SECTION TABEL --- */}
+      <div className="custom-card-navy mt-5 shadow-sm">
+        <div className="custom-card-header table-header-bg">
+          <div className="header-info">
+            <h5 className="m-0 text-white">Daftar Program Tersedia</h5>
+            <p className="card-subtitle-text">Terdeteksi {listProgram.length} program bantuan dalam database</p>
+          </div>
           <button 
-            className={`btn btn-sm ${modeKelola ? 'btn-danger' : 'btn-light'}`} 
+            className={`btn-mode-toggle ${modeKelola ? 'toggle-active' : ''}`} 
             onClick={() => setModeKelola(!modeKelola)}
           >
-            {modeKelola ? "❌ Tutup Mode Edit" : "⚙️ Mode Edit"}
+            <Settings2 size={16} className="me-2"/>
+            {modeKelola ? "Selesai" : "Edit List"}
           </button>
         </div>
-
-        <div className="card-body p-0">
-          <table className="table table-striped table-hover mb-0 align-middle">
-            <thead className="table-light">
+        
+        <div className="table-responsive">
+          <table className="table table-modern-style align-middle mb-0">
+            <thead>
               <tr>
-                <th style={{width: '5%'}}>No</th>
-                <th style={{width: '20%'}}>Nama Program</th>
-                <th style={{width: '30%'}}>Syarat Seleksi</th>
-                <th>Deskripsi</th>
-                
-                {/* Kolom Aksi hanya muncul jika Mode Edit dinyalakan */}
-                {modeKelola && <th className="text-center bg-warning bg-opacity-10" style={{width: '15%'}}>Aksi</th>}
+                <th className="ps-4">No</th>
+                <th>Informasi Program</th>
+                <th>Kriteria Seleksi</th>
+                {modeKelola && <th className="text-center">Aksi</th>}
               </tr>
             </thead>
             <tbody>
+              <AnimatePresence>
               {listProgram.length > 0 ? (
                 listProgram.map((item, index) => (
-                  <tr key={item.id}>
-                    <td>{index + 1}</td>
-                    <td className="fw-bold">{item.nama_program}</td>
+                  <motion.tr 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }}
+                    key={item.id}
+                  >
+                    <td className="ps-4 text-muted fw-bold">{index + 1}</td>
                     <td>
-                      <small className="d-block text-muted">
-                        Max Gaji: {item.maksimal_penghasilan ? `Rp ${parseInt(item.maksimal_penghasilan).toLocaleString()}` : '-'}
-                      </small>
-                      <small className="d-block text-muted">
-                        Min Tanggungan: {item.minimal_tanggungan ? `${item.minimal_tanggungan} Orang` : '-'}
-                      </small>
+                      <div className="fw-bold text-dark fs-6">{item.nama_program}</div>
+                      <div className="text-muted small text-truncate" style={{maxWidth: '300px'}}>{item.deskripsi}</div>
                     </td>
-                    <td>{item.deskripsi}</td>
-
-                    {/* HANYA TOMBOL EDIT YANG MUNCUL DI SINI */}
+                    <td>
+                      <div className="criteria-pills-container">
+                        <div className="pill-item">
+                          <CircleDollarSign size={14} className="me-1 text-primary"/>
+                          <span>Max:</span> {item.maksimal_penghasilan ? `Rp ${parseInt(item.maksimal_penghasilan).toLocaleString()}` : '∞'}
+                        </div>
+                        <div className="pill-item">
+                          <Users size={14} className="me-1 text-success"/>
+                          <span>Min:</span> {item.minimal_tanggungan ? `${item.minimal_tanggungan} Jiwa` : '0'}
+                        </div>
+                      </div>
+                    </td>
                     {modeKelola && (
-                        <td className="text-center bg-warning bg-opacity-10">
-                            <button className="btn btn-sm btn-primary w-100" onClick={() => handleEdit(item)}>
-                                ✏️ Edit
-                            </button>
-                        </td>
+                      <td className="text-center">
+                        <button className="btn-action-edit" onClick={() => handleEdit(item)}>
+                          <Edit3 size={14} />
+                        </button>
+                      </td>
                     )}
-                  </tr>
+                  </motion.tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={modeKelola ? 5 : 4} className="text-center py-4 text-muted">
-                    Belum ada data program.
+                  <td colSpan={modeKelola ? 4 : 3} className="text-center py-5">
+                    <Info size={40} className="text-light mb-2 d-block mx-auto"/>
+                    <span className="text-muted">Tidak ada program bantuan aktif.</span>
                   </td>
                 </tr>
               )}
+              </AnimatePresence>
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

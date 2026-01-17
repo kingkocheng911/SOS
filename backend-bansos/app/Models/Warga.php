@@ -9,15 +9,12 @@ class Warga extends Model
 {
     use HasFactory;
 
-    /**
-     * $fillable: Menentukan kolom mana saja yang boleh diisi dari input form.
-     * Pastikan 'program_id' dan 'status_seleksi' ada di sini.
-     */
     protected $fillable = [
         'user_id',
         'nama',
         'nik',
         'kk',
+        'foto',      // Nama file foto yang tersimpan di database
         'foto_ktp',
         'foto_kk',
         'gaji',
@@ -25,18 +22,41 @@ class Warga extends Model
         'alamat',
         'rt',
         'rw',
-        
-        // --- TAMBAHAN PENTING (YANG SEBELUMNYA HILANG) ---
-        'nomor_hp',   // <--- Wajib ada agar HP tersimpan!
-        'pekerjaan',  // <--- Wajib ada agar Pekerjaan tersimpan!
-        
-        // --- KOLOM STATUS & PROGRAM ---
+        'nomor_hp',
+        'pekerjaan',
         'status_seleksi',
         'program_id',
     ];
+
     /**
-     * Relasi ke User
-     * Menghubungkan data profil warga dengan akun loginnya
+     * Appends: Menambahkan field virtual ke JSON API.
+     * Kita gunakan 'foto_url' agar sinkron dengan frontend.
+     */
+    protected $appends = ['foto_url'];
+
+    /**
+     * ACCESSOR: getFotoUrlAttribute
+     * Menghasilkan URL lengkap untuk foto profil.
+     */
+    public function getFotoUrlAttribute()
+    {
+        // 1. Cek apakah ada file foto di kolom 'foto' tabel wargas
+        if ($this->foto) {
+            // Gunakan path 'uploads/profil/' sesuai dengan yang ada di WargaController
+            return asset('uploads/profil/' . $this->foto);
+        }
+
+        // 2. Jika di tabel wargas kosong, coba cek foto di tabel User (via relasi)
+        if ($this->user && $this->user->foto) {
+            return asset('uploads/profil/' . $this->user->foto);
+        }
+
+        // 3. Jika benar-benar kosong, gunakan UI-Avatars (Inisial Nama)
+        return "https://ui-avatars.com/api/?name=" . urlencode($this->nama) . "&background=random&color=fff&size=128&bold=true";
+    }
+
+    /**
+     * Relasi ke User (Satu warga memiliki satu akun user)
      */
     public function user()
     {
@@ -45,7 +65,6 @@ class Warga extends Model
 
     /**
      * Relasi ke Seleksi
-     * Menghubungkan warga dengan riwayat pengajuan bantuannya
      */
     public function seleksi()
     {
@@ -53,13 +72,10 @@ class Warga extends Model
     }
 
     /**
-     * Relasi: Setiap Warga "Milik" (Belongs To) Satu Program Bantuan
-     * Ini berguna agar di Controller kita bisa panggil: $warga->program->nama_program
+     * Relasi ke Program Bantuan
      */
     public function program()
     {
-        // Pastikan nama Model Program Anda adalah 'ProgramBantuan'
-        // Jika namanya 'Program', ganti jadi Program::class
         return $this->belongsTo(ProgramBantuan::class, 'program_id');
     }
 }

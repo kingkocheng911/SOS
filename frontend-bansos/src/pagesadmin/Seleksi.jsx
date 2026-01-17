@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "./Seleksi.css"; // IMPORT CSS DISINI
+import { 
+  Users, ClipboardList, CheckCircle, Clock, 
+  AlertCircle, Search, CheckCircle2, Filter 
+} from "lucide-react";
 
 function Seleksi() {
-  // State Data Master
   const [listProgram, setListProgram] = useState([]);
   const [listSeleksi, setListSeleksi] = useState([]);
-
-  // State Logika Otomatisasi
   const [selectedProgram, setSelectedProgram] = useState("");
   const [kandidatList, setKandidatList] = useState([]); 
   const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false); // Tambahan: Loading saat menyimpan
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -18,26 +20,22 @@ function Seleksi() {
 
   const fetchData = async () => {
     try {
-      // 1. Ambil Program
       const resProgram = await axios.get("http://127.0.0.1:8000/api/program");
       const dataProgram = Array.isArray(resProgram.data) ? resProgram.data : (resProgram.data.data || []);
       setListProgram(dataProgram);
 
-      // 2. Ambil History Seleksi
       const resSeleksi = await axios.get("http://127.0.0.1:8000/api/seleksi");
       const dataSeleksi = Array.isArray(resSeleksi.data) ? resSeleksi.data : (resSeleksi.data.data || []);
       setListSeleksi(dataSeleksi);
-
     } catch (error) {
       console.error("Gagal ambil data:", error);
     }
   };
 
-  // --- LOGIKA: FILTER OTOMATIS SAAT PILIH PROGRAM ---
   const handleProgramChange = async (e) => {
     const programId = e.target.value;
     setSelectedProgram(programId);
-    setKandidatList([]); // Reset list
+    setKandidatList([]);
 
     if (programId) {
       setIsLoading(true);
@@ -45,188 +43,249 @@ function Seleksi() {
         const response = await axios.post("http://127.0.0.1:8000/api/seleksi/filter-kandidat", {
           program_id: programId
         });
-        
-        // Data kandidat dari backend
         setKandidatList(response.data.data || []);
       } catch (error) {
         console.error("Gagal memfilter kandidat:", error);
-        alert("Gagal mengambil data kandidat otomatis. Pastikan server backend jalan.");
       }
       setIsLoading(false);
     }
   };
 
-  // --- LOGIKA: SIMPAN SEMUA KANDIDAT ---
   const handleSimpanSemua = async () => {
     if (kandidatList.length === 0) return;
-    
-    if (!window.confirm(`Apakah Anda yakin ingin mendaftarkan ${kandidatList.length} warga ini?`)) return;
+    if (!window.confirm(`Konfirmasi pendaftaran untuk ${kandidatList.length} warga?`)) return;
 
-    setIsSaving(true); // Mulai loading simpan
-
+    setIsSaving(true);
     try {
-      // Loop dan kirim data satu per satu
       const promises = kandidatList.map(warga => 
         axios.post("http://127.0.0.1:8000/api/seleksi", {
-          warga_id: warga.id,           // ID dari tabel users
-          program_bantuan_id: selectedProgram // ID Program
+          warga_id: warga.id,           
+          program_id: selectedProgram   
         })
       );
-
-      // Tunggu semua proses selesai
       await Promise.all(promises);
-
-      alert("Sukses! Semua kandidat berhasil didaftarkan.");
-      fetchData();           // Refresh tabel history di bawah
-      setKandidatList([]);   // Kosongkan tabel kandidat
-      setSelectedProgram(""); // Reset dropdown
-      
+      alert("Proses Seleksi Berhasil Disimpan!");
+      fetchData();           
+      setKandidatList([]);   
     } catch (error) {
-      console.error("Error saat menyimpan:", error);
-      // Cek pesan error dari backend jika ada
-      const pesan = error.response?.data?.message || "Terjadi kesalahan saat menyimpan data.";
-      alert("Gagal: " + pesan);
+      alert("Gagal: " + (error.response?.data?.message || "Terjadi kesalahan"));
     }
-    
-    setIsSaving(false); // Selesai loading
+    setIsSaving(false);
   };
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Seleksi Penerima Bantuan (Otomatis)</h2>
-      
-      {/* BAGIAN 1: FILTER PROGRAM */}
-      <div className="card mb-4 shadow-sm border-primary">
-        <div className="card-header bg-primary text-white">
-            1. Pilih Program Bantuan
+    <div className="seleksi-container">
+      {/* HEADER SECTION */}
+      <div className="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h3 className="header-title">Seleksi Penerima Bantuan</h3>
+          <p className="header-subtitle">Otomatisasi pemilihan warga berdasarkan kriteria program</p>
         </div>
-        <div className="card-body">
-            <div className="row align-items-center">
-                <div className="col-md-8">
-                    <select 
-                        className="form-select form-select-lg" 
-                        value={selectedProgram} 
-                        onChange={handleProgramChange}
-                    >
-                        <option value="">-- Pilih Jenis Bantuan --</option>
-                        {listProgram.map(prog => (
-                            <option key={prog.id} value={prog.id}>
-                                {prog.nama_program || prog.nama} 
-                                {prog.maksimal_penghasilan ? ` (Max Gaji: Rp ${parseInt(prog.maksimal_penghasilan).toLocaleString('id-ID')})` : ''}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="col-md-4">
-                    <small className="text-muted">
-                        *Sistem akan otomatis mencari warga yang sesuai kriteria (Gaji & Tanggungan).
-                    </small>
-                </div>
+        <div className="stats-box d-flex align-items-center gap-2">
+            <div className="stats-icon-wrapper">
+            <Users className="text-primary" size={20} />
             </div>
-        </div>
+            <span className="fw-semibold small">
+            {listSeleksi.length} Total Pengajuan
+            </span>
+</div>
       </div>
 
-      {/* BAGIAN 2: HASIL PREDIKSI / KANDIDAT */}
-      {selectedProgram && (
-          <div className="card mb-4 shadow-sm border-warning">
-            <div className="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                <strong>2. Kandidat Terpilih (Sesuai Kriteria)</strong>
-                
-                {/* Tombol Simpan Muncul jika ada data */}
-                {kandidatList.length > 0 && (
-                    <button 
-                        onClick={handleSimpanSemua} 
-                        className="btn btn-dark btn-sm"
-                        disabled={isSaving}
-                    >
-                        {isSaving ? "Menyimpan..." : `Simpan / Setujui Semua (${kandidatList.length})`}
-                    </button>
-                )}
+      <div className="row g-4">
+        {/* STEP 1: FILTER PROGRAM */}
+        <div className="col-lg-4">
+          <div className="card custom-card">
+            <div className="card-header custom-card-header">
+              <div className="d-flex align-items-center gap-2 text-primary">
+                <Filter size={18} />
+                <span className="fw-bold text-dark">1. Konfigurasi Program</span>
+              </div>
             </div>
-            <div className="card-body p-0">
-                {isLoading ? (
-                    <div className="p-5 text-center">
-                        <div className="spinner-border text-warning" role="status"></div>
-                        <p className="mt-2">Sedang memproses data warga...</p>
-                    </div>
-                ) : (
-                    <table className="table table-striped mb-0">
-                        <thead>
-                            <tr>
-                                <th>Nama Warga</th>
-                                <th>NIK</th>
-                                <th>Pekerjaan</th>
-                                <th>Penghasilan (Gaji)</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {kandidatList.length > 0 ? (
-                                kandidatList.map((warga) => (
-                                    <tr key={warga.id}>
-                                        <td>{warga.nama || warga.name}</td>
-                                        <td>{warga.nik}</td>
-                                        <td>{warga.pekerjaan || '-'}</td>
-                                        <td>
-                                            {/* PERBAIKAN: Gunakan warga.gaji dan format Rupiah */}
-                                            Rp {warga.gaji ? parseInt(warga.gaji).toLocaleString('id-ID') : 0}
-                                        </td>
-                                        <td><span className="badge bg-success">Lolos Syarat</span></td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan="5" className="text-center py-4 text-muted">
-                                        Tidak ada warga yang memenuhi kriteria program ini.
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                )}
+            <div className="card-body">
+              <label className="form-label small fw-bold text-muted">Pilih Jenis Bantuan</label>
+              <select 
+                className="form-select custom-select mb-3" 
+                value={selectedProgram} 
+                onChange={handleProgramChange}
+              >
+                <option value="">-- Cari Program --</option>
+                {listProgram.map(prog => (
+                  <option key={prog.id} value={prog.id}>
+                    {prog.nama_program || prog.nama}
+                  </option>
+                ))}
+              </select>
+              
+              {selectedProgram && (
+                <div className="info-box">
+                  <div className="d-flex align-items-start gap-2">
+                    <AlertCircle size={16} className="text-primary mt-1" />
+                    <p className="small text-dark mb-0 italic">
+                      Sistem sedang memfilter warga dengan penghasilan di bawah ambang batas program.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-      )}
+        </div>
 
-      {/* BAGIAN 3: HISTORY (Data yang sudah tersimpan) */}
-      <div className="card shadow-sm">
-        <div className="card-header bg-secondary text-white">3. History Pengajuan (Database)</div>
-        <div className="card-body">
-            <div className="table-responsive">
-                <table className="table table-bordered table-hover">
-                    <thead className="table-light">
-                        <tr>
-                            <th>No</th>
-                            <th>Nama Warga</th>
-                            <th>Program</th>
-                            <th>Tanggal Daftar</th>
-                            <th>Status</th>
-                        </tr>
+        {/* STEP 2: HASIL KANDIDAT */}
+        <div className="col-lg-8">
+          <div className="card custom-card h-100">
+            <div className="card-header custom-card-header d-flex justify-content-between align-items-center">
+              <div className="d-flex align-items-center gap-2 text-success">
+                <CheckCircle2 size={18} />
+                <span className="fw-bold text-dark">2. Kandidat Otomatis</span>
+              </div>
+              
+              {kandidatList.length > 0 && (
+                <button 
+                  onClick={handleSimpanSemua} 
+                  className="btn btn-primary btn-sm px-4 rounded-pill shadow-sm fw-bold d-flex align-items-center gap-2"
+                  disabled={isSaving}
+                >
+                  {isSaving ? "Memproses..." : <><CheckCircle size={16}/> Setujui ({kandidatList.length})</>}
+                </button>
+              )}
+            </div>
+
+            <div className="card-body p-0">
+              {isLoading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-grow text-primary" role="status"></div>
+                  <p className="mt-3 text-muted small fw-medium">Menganalisis data...</p>
+                </div>
+              ) : !selectedProgram ? (
+                <div className="text-center py-5 opacity-25">
+                  <Search size={48} className="mb-2" />
+                  <p className="small">Pilih program untuk memulai</p>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table modern-table align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th className="px-4">Nama Warga</th>
+                        <th>Pekerjaan</th>
+                        <th>Penghasilan</th>
+                        <th className="text-center">Hasil</th>
+                      </tr>
                     </thead>
                     <tbody>
-                        {listSeleksi.length > 0 ? (
-                            listSeleksi.map((item, index) => (
-                                <tr key={item.id}>
-                                    <td>{index + 1}</td>
-                                    {/* Handle nama warga jika relasi ada */}
-                                    <td>{item.warga?.nama || item.warga?.name || "User Terhapus"}</td>
-                                    <td>{item.program_bantuan?.nama_program || item.program_bantuan?.nama}</td>
-                                    <td>{new Date(item.created_at).toLocaleDateString('id-ID')}</td>
-                                    <td>
-                                        {item.status == 1 && <span className="badge bg-warning text-dark">Menunggu</span>}
-                                        {item.status == 2 && <span className="badge bg-success">Disetujui</span>}
-                                        {item.status == 3 && <span className="badge bg-danger">Ditolak</span>}
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5" className="text-center">Belum ada data pendaftaran.</td>
-                            </tr>
-                        )}
+                      {kandidatList.length > 0 ? (
+                        kandidatList.map((warga) => (
+                          <tr key={warga.id}>
+                            <td className="px-4">
+                              <div className="fw-bold text-dark">{warga.nama || warga.name}</div>
+                              <div className="small text-muted">{warga.nik}</div>
+                            </td>
+                            <td className="small text-dark">{warga.pekerjaan || '-'}</td>
+                            <td className="fw-semibold text-primary">
+                              Rp {warga.gaji ? parseInt(warga.gaji).toLocaleString('id-ID') : 0}
+                            </td>
+                            <td className="text-center">
+                              <span className="badge badge-soft-success rounded-pill-custom">
+                                LOLOS SYARAT
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" className="text-center py-5 text-muted small">
+                            Tidak ada warga yang sesuai kriteria.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
-                </table>
+                  </table>
+                </div>
+              )}
             </div>
+          </div>
+        </div>
+
+        {/* STEP 3: HISTORY */}
+        <div className="col-12">
+          <div className="card custom-card">
+            <div className="card-header custom-card-header d-flex align-items-center gap-2">
+              <ClipboardList size={18} className="text-secondary" />
+              <span className="fw-bold">3. Riwayat Seleksi</span>
+            </div>
+            <div className="card-body p-0">
+              <div className="table-responsive">
+                <table className="table modern-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th className="px-4">No</th>
+                      <th>Penerima</th>
+                      <th>Program Bantuan</th>
+                      <th>Tanggal</th>
+                      <th className="text-center">Status Final</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                   {listSeleksi.length > 0 ? (
+  listSeleksi.map((item, index) => {
+    // 1. Perbaikan: Ambil nama dari objek warga atau user dengan aman
+    const namaPenerima = item.warga?.nama || item.warga?.name || "Data Warga Hilang";
+    const namaProgram = item.program_bantuan?.nama_program || item.program_bantuan?.nama || "Program Tidak Diketahui";
+    
+    // 2. Perbaikan: Validasi Tanggal agar tidak muncul "Invalid Date"
+    const formatTanggal = (dateString) => {
+      try {
+        const date = new Date(dateString);
+        return isNaN(date.getTime()) 
+          ? "-" 
+          : date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) {
+        return "-";
+      }
+    };
+
+    return (
+      <tr key={item.id || index}>
+        <td className="px-4 text-muted small fw-bold">{index + 1}</td>
+        <td>
+          <div className="fw-semibold text-dark">{namaPenerima}</div>
+                    {/* Tambahkan NIK kecil jika ada untuk membedakan antar warga */}
+                    {item.warga?.nik && <div className="text-muted" style={{fontSize: '10px'}}>{item.warga.nik}</div>}
+                    </td>
+                    <td>
+                    <span className="text-dark small fw-medium">{namaProgram}</span>
+                    </td>
+                    <td className="small text-muted">
+                    <div className="d-flex align-items-center gap-1">
+                        <Clock size={12} />
+                        {formatTanggal(item.created_at)}
+                    </div>
+                    </td>
+                    <td className="text-center">
+                    {/* Status Badge dengan fallback jika status kosong */}
+                    {item.status == 1 && <span className="badge badge-soft-warning rounded-pill-custom">MENUNGGU</span>}
+                    {item.status == 2 && <span className="badge badge-soft-success rounded-pill-custom">DISETUJUI</span>}
+                    {item.status == 3 && <span className="badge badge-soft-danger rounded-pill-custom">DITOLAK</span>}
+                    {!item.status && <span className="badge bg-light text-muted rounded-pill-custom">DRAFT</span>}
+                    </td>
+                </tr>
+                );
+            })
+            ) : (
+            <tr>
+                <td colSpan="5" className="text-center py-5 text-muted">
+                <div className="opacity-50">
+                    <ClipboardList size={32} className="mb-2" />
+                    <p className="small mb-0">Belum ada riwayat pengajuan dalam database.</p>
+                </div>
+                </td>
+            </tr>
+            )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

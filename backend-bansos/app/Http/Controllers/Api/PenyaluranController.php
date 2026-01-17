@@ -10,31 +10,32 @@ use App\Models\Seleksi;
 class PenyaluranController extends Controller
 {
     public function index()
-{
-    try {
-        // Mengambil riwayat penyaluran beserta relasi berantai
-        $riwayat = Penyaluran::with(['seleksi.warga', 'seleksi.programBantuan'])
-                    ->latest()
-                    ->get();
+    {
+        try {
+            // Mengambil riwayat penyaluran beserta relasi berantai
+            $riwayat = Penyaluran::with(['seleksi.warga', 'seleksi.programBantuan'])
+                        ->latest()
+                        ->get();
 
-        $siapSalur = Seleksi::with(['warga', 'programBantuan'])
-                    ->where('status', 2) 
-                    ->doesntHave('penyaluran') 
-                    ->get();
+            $siapSalur = Seleksi::with(['warga', 'programBantuan'])
+                        ->where('status', 2) 
+                        ->doesntHave('penyaluran') 
+                        ->get();
 
-        return response()->json([
-            'status' => true,
-            'riwayat' => $riwayat,
-            'siap_salur' => $siapSalur
-        ]);
-    } catch (\Exception $e) {
-        // Memberikan detail error ke konsol browser jika status 500
-        return response()->json([
-            'status' => false, 
-            'message' => 'Error: ' . $e->getMessage()
-        ], 500);
+            return response()->json([
+                'status' => true,
+                'data' => $riwayat, // Tambahkan ini agar Dashboard bisa membaca .data.data
+                'riwayat' => $riwayat, 
+                'siap_salur' => $siapSalur
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false, 
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
+
     public function store(Request $request)
     {
         $request->validate([
@@ -44,14 +45,12 @@ class PenyaluranController extends Controller
         ]);
 
         try {
-            // Simpan ke tabel penyaluran_bantuans
             $penyaluran = Penyaluran::create([
                 'seleksi_id' => $request->seleksi_id,
                 'tanggal_penyaluran' => $request->tanggal_penyaluran,
                 'keterangan' => $request->keterangan,
             ]);
 
-            // Update Status Seleksi jadi 'Disalurkan' (4)
             $seleksi = Seleksi::find($request->seleksi_id);
             if ($seleksi) {
                 $seleksi->update(['status' => 4]); 

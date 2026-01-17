@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import './AjukanBantuan.css';
 
 const AjukanBantuan = ({ 
@@ -13,134 +13,133 @@ const AjukanBantuan = ({
     setActiveTab 
 }) => {
     
-    // 1. LOGIKA CEK KELENGKAPAN PROFIL
+    // Logika Cek Kelengkapan Profil
     const profilLengkap = 
         user.alamat && 
         (user.nomor_hp || user.no_telp) && 
         user.pekerjaan && 
         (user.gaji !== null && user.gaji !== undefined);
 
-    // 2. TAMPILAN JIKA PROFIL BELUM LENGKAP (Warning State)
     if (!profilLengkap) {
         return (
-            <div className="form-container warning-mode">
-                <div className="warning-icon-wrapper">
-                    <i className="bi bi-exclamation-triangle-fill warning-icon"></i>
+            <div className="form-container warning-mode animate-fade-in">
+                <div className="warning-illustration">
+                    <div className="pulse-orange"></div>
+                    <i className="bi bi-person-bounding-box warning-main-icon"></i>
                 </div>
                 
-                <h3 className="warning-title">Profil Belum Lengkap</h3>
-                
+                <h3 className="warning-title">Lengkapi Profil Anda</h3>
                 <p className="warning-text">
-                    Untuk menjamin validitas data, Anda wajib melengkapi data 
-                    <strong className="text-dark"> Alamat, Nomor HP, Pekerjaan, dan Gaji</strong> sebelum mengajukan bantuan.
+                    Sistem mendeteksi bahwa data profil Anda belum lengkap. Mohon lengkapi 
+                    <strong> Alamat, Nomor HP, Pekerjaan, dan Gaji</strong> untuk melanjutkan pengajuan bantuan.
                 </p>
                 
                 <button 
-                    className="btn-primary-gradient btn-warning-action" 
+                    className="btn-action-primary shadow-sm" 
                     onClick={() => setActiveTab("profil")}
                 >
-                    <i className="bi bi-pencil-square"></i> Lengkapi Profil
+                    <i className="bi bi-arrow-right-circle-fill me-2"></i> Buka Pengaturan Profil
                 </button>
             </div>
         );
     }
 
-    // 3. TAMPILAN FORMULIR UTAMA (Ready State)
     return (
-        <div className="form-container">
-            {/* Header Form */}
-            <div className="form-header">
-                <div className="header-icon-box">
-                    <i className="bi bi-file-earmark-text-fill text-primary fs-4"></i>
+        <div className="form-container-upgrade animate-fade-in">
+            {/* Step Progress Indicator */}
+            <div className="step-indicator">
+                <div className="step active">
+                    <div className="step-number">1</div>
+                    <span>Data Diri</span>
                 </div>
-                <div>
-                    <h5 className="form-title">Formulir Pengajuan</h5>
-                    <p className="form-subtitle">Isi data dengan jujur dan benar.</p>
+                <div className="step-line"></div>
+                <div className="step active">
+                    <div className="step-number">2</div>
+                    <span>Pilih Program</span>
+                </div>
+                <div className="step-line"></div>
+                <div className="step">
+                    <div className="step-number">3</div>
+                    <span>Verifikasi</span>
                 </div>
             </div>
-            
-            <form onSubmit={handleSubmitPengajuan}>
-                <div className="row">
-                    {/* Input Nama (Read Only) */}
-                    <div className="col-md-6 input-group">
-                        <label className="modern-label">Nama Lengkap</label>
-                        <input 
-                            type="text" 
-                            className="modern-input read-only" 
-                            value={user.name || user.nama || ''} 
-                            readOnly 
-                        />
-                    </div>
-                    
-                    {/* Input NIK (Read Only) */}
-                    <div className="col-md-6 input-group">
-                        <label className="modern-label">Nomor Induk Kependudukan (NIK)</label>
-                        <input 
-                            type="text" 
-                            className="modern-input read-only" 
-                            value={user.nik || ''} 
-                            readOnly 
-                        />
-                    </div>
-                </div>
-                
-                {/* Pilihan Jenis Bantuan */}
-                <div className="input-group">
-                    <label className="modern-label">Program Bantuan</label>
-                    <select 
-                        className="modern-input" 
-                        value={jenisBansos} 
-                        onChange={(e) => setJenisBansos(e.target.value)} 
-                        required
-                        style={{cursor: 'pointer'}}
-                    >
-                        <option value="">-- Pilih Program Bantuan Sosial --</option>
-                        {daftarProgram.map((prog) => (
-                            <option key={prog.id} value={prog.id}>
-                                {prog.nama_program}
-                            </option>
-                        ))}
-                    </select>
-                </div>
 
-                {/* Input Alasan */}
-                <div className="input-group">
-                    <label className="modern-label">Alasan Pengajuan</label>
-                    <textarea 
-                        className="modern-input" 
-                        rows="5" 
-                        placeholder="Ceritakan kondisi ekonomi keluarga Anda saat ini..." 
-                        value={alasan} 
-                        onChange={(e) => setAlasan(e.target.value)} 
-                        required
-                    ></textarea>
-                    
-                    <div className="input-helper">
-                        <i className="bi bi-info-circle me-2 text-primary"></i>
-                        <span>Pastikan alasan yang Anda tulis sesuai dengan fakta di lapangan untuk mempermudah proses verifikasi.</span>
+            <div className="form-content-wrapper">
+                <div className="form-info-sidebar">
+                    <div className="info-card-blue">
+                        <h6><i className="bi bi-shield-check me-2"></i>Verifikasi Otomatis</h6>
+                        <p>Data NIK Anda akan diverifikasi langsung dengan database kependudukan desa.</p>
+                    </div>
+                    <div className="info-card-light">
+                        <h6>Tips Pengajuan:</h6>
+                        <ul className="small text-muted ps-3">
+                            <li>Gunakan bahasa yang sopan.</li>
+                            <li>Jelaskan alasan secara mendetail.</li>
+                            <li>Pastikan nomor WhatsApp aktif.</li>
+                        </ul>
                     </div>
                 </div>
 
-                {/* Tombol Submit dengan Loading State */}
-                <div className="mt-4">
-                    <button 
-                        type="submit" 
-                        className="btn-primary-gradient" 
-                        disabled={isSubmitting}
-                    >
-                        {isSubmitting ? (
-                            <>
-                                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span>Sedang Mengirim Data...</span>
-                            </>
-                        ) : (
-                            <>
-                                <i className="bi bi-send-fill"></i> Kirim Permohonan Sekarang
-                            </>
-                        )}
-                    </button>
+                <div className="form-main-area">
+                    <form onSubmit={handleSubmitPengajuan}>
+                        <div className="row g-3 mb-4">
+                            <div className="col-md-6">
+                                <label className="label-modern">Nama Lengkap</label>
+                                <div className="input-with-icon">
+                                    <i className="bi bi-person"></i>
+                                    <input type="text" className="input-modern readonly" value={user.name || ''} readOnly />
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <label className="label-modern">NIK Kependudukan</label>
+                                <div className="input-with-icon">
+                                    <i className="bi bi-card-text"></i>
+                                    <input type="text" className="input-modern readonly" value={user.nik || ''} readOnly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="label-modern">Pilih Program Bantuan</label>
+                            <select 
+                                className="input-modern select-custom" 
+                                value={jenisBansos} 
+                                onChange={(e) => setJenisBansos(e.target.value)} 
+                                required
+                            >
+                                <option value="">-- Pilih Program --</option>
+                                {daftarProgram.map((prog) => (
+                                    <option key={prog.id} value={prog.id}>{prog.nama_program}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="label-modern">Alasan Pengajuan</label>
+                            <textarea 
+                                className="input-modern area-custom" 
+                                rows="4" 
+                                placeholder="Jelaskan mengapa Anda layak menerima bantuan ini..." 
+                                value={alasan} 
+                                onChange={(e) => setAlasan(e.target.value)} 
+                                required
+                            ></textarea>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            className="btn-submit-modern" 
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? (
+                                <><span className="spinner-border spinner-border-sm me-2"></span> Mengirim...</>
+                            ) : (
+                                <><i className="bi bi-send-check-fill me-2"></i> Kirim Pengajuan Bantuan</>
+                            )}
+                        </button>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };

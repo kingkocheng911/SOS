@@ -18,8 +18,8 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), [
             'name'      => 'required|string|max:255',
             'email'     => 'required|string|email|max:255|unique:users', // Email harus unik
-            'password'  => 'required|string|min:8', // Perlu field password_confirmation
-            'nik'       => 'required|numeric|digits:16|unique:users', // <--- WAJIB: NIK 16 digit & unik
+            'password'  => 'required|string|min:8', 
+            'nik'       => 'required|numeric|digits:16', // Hapus unique:users agar bisa klaim data admin
         ]);
 
         // Jika validasi gagal
@@ -27,14 +27,35 @@ class AuthController extends Controller
             return response()->json($validator->errors(), 422);
         }
 
-        // 2. Buat User Baru
-        $user = User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
-            'password'  => Hash::make($request->password), // Enkripsi password
-            'role'      => 'warga', // <--- PENTING: Saya ubah jadi 'warga' agar sesuai Frontend
-            'nik'       => $request->nik // <--- Simpan NIK ke database
-        ]);
+        // 2. Logika Cek NIK (Klaim Akun vs Akun Baru)
+        $existingUser = User::where('nik', $request->nik)->first();
+
+        if ($existingUser) {
+            // Jika NIK sudah ada dan sudah punya email, berarti akun sudah aktif
+            if ($existingUser->email != null) {
+                return response()->json([
+                    'nik' => ['NIK ini sudah terdaftar dan memiliki akun aktif.']
+                ], 422);
+            }
+
+            // JIKA NIK ADA (Inputan Admin), maka kita UPDATE data yang sudah ada
+            $existingUser->update([
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'password'  => Hash::make($request->password),
+                'role'      => 'warga',
+            ]);
+            $user = $existingUser;
+        } else {
+            // JIKA NIK BELUM ADA, Buat User Baru
+            $user = User::create([
+                'name'      => $request->name,
+                'email'     => $request->email,
+                'password'  => Hash::make($request->password), 
+                'role'      => 'warga', 
+                'nik'       => $request->nik 
+            ]);
+        }
 
         // 3. Kembalikan Respon Sukses
         return response()->json([
@@ -88,39 +109,36 @@ class AuthController extends Controller
     }
 
     public function getDataWilayah()
-{
-    // Kita pindahkan data yang tadi di React ke sini
-    $dataWilayah = [
-        [
-            "nama_dukuh" => "Dukuh Krajan",
-            "list_rw" => [
-                [
-                    "rw" => "01",
-                    "list_rt" => ["01", "02", "03", "04"]
-                ],
-                [
-                    "rw" => "02",
-                    "list_rt" => ["05", "06", "07"]
+    {
+        $dataWilayah = [
+            [
+                "nama_dukuh" => "Dukuh Krajan",
+                "list_rw" => [
+                    [
+                        "rw" => "01",
+                        "list_rt" => ["01", "02", "03", "04"]
+                    ],
+                    [
+                        "rw" => "02",
+                        "list_rt" => ["05", "06", "07"]
+                    ]
+                ]
+            ],
+            [
+                "nama_dukuh" => "Dukuh Sukamaju",
+                "list_rw" => [
+                    [
+                        "rw" => "03",
+                        "list_rt" => ["08", "09", "10"]
+                    ],
+                    [
+                        "rw" => "04",
+                        "list_rt" => ["11", "12"]
+                    ]
                 ]
             ]
-        ],
-        [
-            "nama_dukuh" => "Dukuh Sukamaju",
-            "list_rw" => [
-                [
-                    "rw" => "03",
-                    "list_rt" => ["08", "09", "10"]
-                ],
-                [
-                    "rw" => "04",
-                    "list_rt" => ["11", "12"]
-                ]
-            ]
-        ]
-        // Tambahkan dukuh lain di sini...
-    ];
+        ];
 
-    return response()->json($dataWilayah);
-}
-
+        return response()->json($dataWilayah);
+    }
 }

@@ -1,0 +1,88 @@
+.modal-overlay-custom {
+    background-color: rgba(15, 23, 42, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 1050;
+    transition: all 0.3s ease;
+}
+
+.modal-content-custom {
+    background-color: #f8f9fa;
+    border-radius: 20px !important;
+    overflow: hidden;
+    border: 1px solid #e9ecef !important;
+}
+
+.modal-header-custom {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    padding: 1.5rem !important;
+}
+
+.avatar-container {
+    width: 120px;
+    height: 120px;
+    padding: 5px;
+    background-color: #f1f3f5;
+    border: 3px solid #4361ee;
+    transition: transform 0.3s ease;
+}
+
+.avatar-container:hover {
+    transform: scale(1.05);
+}
+
+.info-card-custom {
+    background-color: #f1f3f5;
+    border-radius: 16px;
+    border: 1px solid #dee2e6;
+}
+
+.label-text {
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.value-text {
+    color: #212529;
+    font-weight: 700;
+}
+
+.badge-nik {
+    background-color: #e0e7ff;
+    color: #4361ee;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.btn-edit-custom {
+    background-color: #ff9f1c;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px;
+    transition: all 0.2s ease;
+}
+
+.btn-edit-custom:hover {
+    background-color: #f3722c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 114, 44, 0.3);
+}
+
+.form-input-custom {
+    background-color: #ffffff;
+    border: 1.5px solid #dee2e6;
+    border-radius: 10px;
+    padding: 0.6rem;
+}
+
+.form-input-custom:focus {
+    background-color: #ffffff;
+    border-color: #4361ee;
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.address-section {
+    background-color: #e9ecef;
+    border: 1px dashed #adb5bd;
+}

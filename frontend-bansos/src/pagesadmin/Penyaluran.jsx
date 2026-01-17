@@ -1,12 +1,21 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Send, 
+  History, 
+  UserCheck, 
+  Calendar, 
+  Package, 
+  CheckCircle2, 
+  Info,
+  ChevronRight
+} from "lucide-react";
+import "./Penyaluran.css";
 
 function Penyaluran() {
-    // State
     const [listSiapSalur, setListSiapSalur] = useState([]); 
     const [riwayatSalur, setRiwayatSalur] = useState([]);   
-    
-    // Form State
     const [selectedSeleksiId, setSelectedSeleksiId] = useState("");
     const [tanggalSalur, setTanggalSalur] = useState("");
     const [keterangan, setKeterangan] = useState("");
@@ -19,11 +28,8 @@ function Penyaluran() {
     const fetchData = async () => {
         try {
             const response = await axios.get("http://127.0.0.1:8000/api/penyaluran");
-            
-            // Edit: Pastikan data yang masuk adalah array agar tidak error .map
             setListSiapSalur(response.data.siap_salur || []);
             setRiwayatSalur(response.data.riwayat || []);
-
         } catch (error) {
             console.error("Gagal ambil data:", error);
         }
@@ -31,12 +37,10 @@ function Penyaluran() {
 
     const handleSimpan = async (e) => {
         e.preventDefault();
-
         if (!selectedSeleksiId) {
             alert("Pilih warga terlebih dahulu!");
             return;
         }
-
         setIsLoading(true);
         try {
             await axios.post("http://127.0.0.1:8000/api/penyaluran", {
@@ -44,85 +48,102 @@ function Penyaluran() {
                 tanggal_penyaluran: tanggalSalur,
                 keterangan: keterangan
             });
-
             alert("Bantuan berhasil disalurkan!");
-            
-            // Reset Form
             setSelectedSeleksiId("");
             setTanggalSalur("");
             setKeterangan("");
-            
             fetchData();
-
         } catch (error) {
-            console.error("Gagal menyimpan:", error);
             alert("Terjadi kesalahan saat menyimpan.");
         }
         setIsLoading(false);
     };
 
     return (
-        <div className="container mt-4">
-            <h2>Penyaluran Bantuan</h2>
+        <motion.div 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="penyaluran-container"
+        >
+            <div className="page-header mb-4">
+                <h2 className="fw-bold text-dark">Penyaluran Bantuan</h2>
+                <p className="text-muted">Kelola distribusi bantuan kepada warga yang telah disetujui.</p>
+            </div>
 
-            {/* FORM PENYALURAN */}
-            <div className="card mb-4 shadow-sm border-primary">
-                <div className="card-header bg-primary text-white">
-                    Input Penyaluran Baru
+            {/* FORM INPUT PENYALURAN */}
+            <div className="custom-card-navy mb-5 shadow-sm">
+                <div className="custom-card-header">
+                    <div className="d-flex align-items-center gap-2">
+                        <Send size={20} className="text-white" />
+                        <h5 className="m-0 text-white">Input Penyaluran Baru</h5>
+                    </div>
                 </div>
-                <div className="card-body">
+                <div className="custom-card-body">
                     <form onSubmit={handleSimpan}>
-                        <div className="row g-3 align-items-end">
-                            
-                            {/* DROPDOWN PENERIMA */}
+                        <div className="row g-4">
                             <div className="col-md-4">
-                                <label className="form-label fw-bold">Pilih Penerima (Disetujui Kades)</label>
-                                <select 
-                                    className="form-select"
-                                    value={selectedSeleksiId}
-                                    onChange={(e) => setSelectedSeleksiId(e.target.value)}
-                                    required
-                                >
-                                    <option value="">-- Pilih Warga --</option>
-                                    {listSiapSalur.length > 0 ? (
-                                        listSiapSalur.map((item) => (
-                                            <option key={item.id} value={item.id}>
-                                                {/* Edit: Ditambah pengecekan jalur warga untuk dropdown */}
-                                                {(item.warga?.nama || item.warga?.name || "Tanpa Nama")} - {(item.program_bantuan?.nama_program || "Bantuan")}
-                                            </option>
-                                        ))
+                                <label className="custom-label">Pilih Penerima (Disetujui Kades)</label>
+                                <div className="input-with-icon">
+                                    <UserCheck className="input-icon-left" size={18} />
+                                    <select 
+                                        className="form-select custom-input"
+                                        value={selectedSeleksiId}
+                                        onChange={(e) => setSelectedSeleksiId(e.target.value)}
+                                        required
+                                    >
+                                        <option value="">-- Pilih Warga --</option>
+                                                {listSiapSalur
+                                                    .filter(item => {
+                                                        const nama = (item.warga?.nama || item.warga?.name || "").toLowerCase();
+                                                        // Filter agar Admin dan Kades tidak muncul di pilihan
+                                                        return !nama.includes("admin") && !nama.includes("desa") && !nama.includes("kepala");
+                                                    })
+                                                    .map((item) => (
+                                                        <option key={item.id} value={item.id}>
+                                                            {(item.warga?.nama || item.warga?.name)} - {item.program_bantuan?.nama_program}
+                                                        </option>
+                                                    ))
+                                                }
+                                            </select>
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <label className="custom-label">Tanggal Penyaluran</label>
+                                <div className="input-with-icon">
+                                    <Calendar className="input-icon-left" size={18} />
+                                    <input 
+                                        type="date" 
+                                        className="form-control custom-input"
+                                        value={tanggalSalur}
+                                        onChange={(e) => setTanggalSalur(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-3">
+                                <label className="custom-label">Keterangan Barang</label>
+                                <div className="input-with-icon">
+                                    <Package className="input-icon-left" size={18} />
+                                    <input 
+                                        type="text" 
+                                        className="form-control custom-input"
+                                        placeholder="Contoh: Beras 10kg"
+                                        value={keterangan}
+                                        onChange={(e) => setKeterangan(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="col-md-2 d-flex align-items-end">
+                                <button type="submit" className="btn-modern-primary w-100" disabled={isLoading}>
+                                    {isLoading ? (
+                                        <span className="spinner-border spinner-border-sm"></span>
                                     ) : (
-                                        <option disabled>Tidak ada data siap salur</option>
+                                        "Simpan Data"
                                     )}
-                                </select>
-                            </div>
-
-                            <div className="col-md-3">
-                                <label className="form-label fw-bold">Tanggal Penyaluran</label>
-                                <input 
-                                    type="date" 
-                                    className="form-control"
-                                    value={tanggalSalur}
-                                    onChange={(e) => setTanggalSalur(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            <div className="col-md-3">
-                                <label className="form-label fw-bold">Keterangan Barang</label>
-                                <input 
-                                    type="text" 
-                                    className="form-control"
-                                    placeholder="Contoh: Beras 10kg"
-                                    value={keterangan}
-                                    onChange={(e) => setKeterangan(e.target.value)}
-                                    required
-                                />
-                            </div>
-
-                            <div className="col-md-2">
-                                <button type="submit" className="btn btn-success w-100" disabled={isLoading}>
-                                    {isLoading ? "Menyimpan..." : "Simpan Data"}
                                 </button>
                             </div>
                         </div>
@@ -131,51 +152,68 @@ function Penyaluran() {
             </div>
 
             {/* TABEL RIWAYAT */}
-            <div className="card shadow-sm">
-                <div className="card-header bg-dark text-white">
-                    Riwayat Penyaluran (Status: Selesai Disalurkan)
+            <div className="custom-card-navy shadow-sm">
+                <div className="custom-card-header table-header-bg">
+                    <div className="d-flex align-items-center gap-2">
+                        <History size={20} className="text-white" />
+                        <h5 className="m-0 text-white">Riwayat Penyaluran</h5>
+                    </div>
                 </div>
-                <div className="card-body">
-                    <div className="table-responsive">
-                        <table className="table table-bordered table-hover table-striped">
-                            <thead className="table-light">
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama Warga</th>
-                                    <th>Program</th>
-                                    <th>Tanggal Terima</th>
-                                    <th>Keterangan</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <div className="table-responsive">
+                    <table className="table table-modern-style align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th className="ps-4">No</th>
+                                <th>Nama Warga</th>
+                                <th>Program</th>
+                                <th>Tanggal Terima</th>
+                                <th>Keterangan</th>
+                                <th className="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <AnimatePresence>
                                 {riwayatSalur.length > 0 ? (
                                     riwayatSalur.map((item, index) => (
-                                        <tr key={item.id}>
-                                            <td>{index + 1}</td>
-                                            {/* Edit: Penyesuaian akses data warga sesuai gambar struktur database */}
-                                            <td className="fw-bold">
+                                        <motion.tr 
+                                            key={item.id}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                        >
+                                            <td className="ps-4 text-muted fw-bold">{index + 1}</td>
+                                            <td className="fw-bold text-dark">
                                                 {item.nama_warga || item.seleksi?.warga?.nama || item.seleksi?.warga?.name || "Data Warga Terhapus"}
                                             </td>
                                             <td>
-                                                {item.nama_program || item.seleksi?.program_bantuan?.nama_program || "Bantuan"}
+                                                <div className="d-flex align-items-center gap-1">
+                                                    <ChevronRight size={14} className="text-primary" />
+                                                    {item.nama_program || item.seleksi?.program_bantuan?.nama_program || "Bantuan"}
+                                                </div>
                                             </td>
                                             <td>{item.tanggal_penyaluran}</td>
-                                            <td>{item.keterangan}</td>
-                                            <td><span className="badge bg-success">Tersalurkan</span></td>
-                                        </tr>
+                                            <td className="text-muted">{item.keterangan}</td>
+                                            <td className="text-center">
+                                                <span className="badge-status-success">
+                                                    <CheckCircle2 size={14} /> Tersalurkan
+                                                </span>
+                                            </td>
+                                        </motion.tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="text-center py-3">Belum ada data penyaluran.</td>
+                                        <td colSpan="6" className="text-center py-5">
+                                            <Info size={40} className="text-light mb-2 d-block mx-auto"/>
+                                            <span className="text-muted">Belum ada data penyaluran.</span>
+                                        </td>
                                     </tr>
                                 )}
-                            </tbody>
-                        </table>
-                    </div>
+                            </AnimatePresence>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 

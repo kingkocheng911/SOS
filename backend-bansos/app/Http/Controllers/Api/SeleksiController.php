@@ -6,194 +6,202 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Seleksi;
 use App\Models\User;
-use App\Models\Warga; // TAMBAHKAN MODEL INI
+use App\Models\Warga; 
 use App\Models\ProgramBantuan; 
-use App\Models\Notifikasi; // TAMBAHKAN MODEL INI
+use App\Models\Notifikasi; 
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 
 class SeleksiController extends Controller
 {
     /**
-     * 1. DAFTAR DATA SELEKSI (HISTORY)
+     * 1. DAFTAR DATA SELEKSI (PERSETUJUAN KADES)
+     * Menggunakan pengecekan manual agar tidak crash jika ada data relasi yang hilang.
      */
     public function index()
     {
-        $data = Seleksi::with(['warga', 'programBantuan'])
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+        try {
+            $seleksis = Seleksi::all();
+            $result = [];
 
-        return response()->json([
-            'status' => true,
-            'message' => 'Daftar seleksi berhasil diambil',
-            'data' => $data
-        ]);
+            foreach ($seleksis as $s) {
+                // Ambil data profil warga
+                $warga = Warga::find($s->warga_id);
+                if (!$warga) continue;
+
+                // Ambil data user terkait
+                $user = User::find($warga->user_id);
+                if (!$user || $user->role !== 'warga') continue;
+
+                // Ambil data program
+                $program = ProgramBantuan::find($s->program_bantuan_id);
+
+                $result[] = [
+                    'id' => $s->id,
+                    'nama_warga' => $user->name ?? 'Anonim',
+                    'nik' => $user->nik ?? '-',
+                    'nama_program' => $program->nama_program ?? 'Program Dihapus',
+                    'status' => $s->status,
+                    'created_at' => $s->created_at ? $s->created_at->format('d/m/Y') : '-'
+                ];
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil mengambil data seleksi',
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Seleksi Index Error: " . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal memuat data: ' . $e->getMessage()
+            ], 500);
+        }
+
+        $result[] = [
+            'id' => $s->id,
+            'nama_warga' => $user->name ?? 'User Tidak Ditemukan',
+            'nik' => $user->nik ?? '-',
+            'nama_program' => $program->nama_program ?? 'Program Dihapus',
+            'status' => $s->status,
+            'created_at' => $s->created_at ? $s->created_at->format('Y-m-d') : null 
+        ];
     }
 
     /**
-     * 2. FITUR SELEKSI OTOMATIS
+     * 2. FILTER KANDIDAT OTOMATIS (Sisi Admin)
+     * MEMPERBAIKI ERROR 500: Mengganti query relasi yang bermasalah dengan logic yang lebih stabil.
      */
     public function filterKandidat(Request $request)
     {
         try {
-            $validator = Validator::make($request->all(), [
-                'program_id' => 'required|exists:program_bantuans,id'
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(['status' => false, 'message' => 'Program ID tidak valid'], 400);
-            }
-
-            $programId = $request->program_id;
-            $program = ProgramBantuan::find($programId);
-
+            $program = ProgramBantuan::find($request->program_id);
             if (!$program) {
                 return response()->json(['status' => false, 'message' => 'Program tidak ditemukan'], 404);
             }
-
+            
+            // Ambil semua user role warga
             $query = User::where('role', 'warga');
 
-            if (!empty($program->maksimal_penghasilan)) {
+            // Filter Gaji (Pastikan kolom gaji ada di tabel users)
+            if ($program->maksimal_penghasilan > 0) {
                 $query->where('gaji', '<=', $program->maksimal_penghasilan);
             }
 
-            if (!empty($program->minimal_tanggungan)) {
+            // Filter Tanggungan (Pastikan kolom tanggungan ada di tabel users)
+            if ($program->minimal_tanggungan > 0) {
                 $query->where('tanggungan', '>=', $program->minimal_tanggungan);
             }
 
-            $query->whereDoesntHave('seleksi', function($q) use ($programId) {
-                $q->where('program_bantuan_id', $programId);
-            });
+            $users = $query->get();
+            $result = [];
 
-            $kandidat = $query->get();
+            foreach ($users as $u) {
+                // Cari data profil warga untuk memastikan mereka terdaftar sebagai warga aktif
+                $warga = Warga::where('user_id', $u->id)->first();
+                if (!$warga) continue;
 
-            $kandidat->transform(function($item) {
-                $item->nama = $item->name; 
-                return $item;
-            });
+                // Cek apakah warga ini sudah pernah mendaftar di program ini sebelumnya
+                $sudahDaftar = Seleksi::where('warga_id', $warga->id)
+                                     ->where('program_bantuan_id', $program->id)
+                                     ->exists();
+
+                if (!$sudahDaftar) {
+                    $result[] = [
+                        'id' => $u->id,
+                        'nama' => $u->name,
+                        'nik' => $u->nik,
+                        'pekerjaan' => $u->pekerjaan ?? '-',
+                        'gaji' => $u->gaji ?? 0
+                    ];
+                }
+            }
 
             return response()->json([
                 'status' => true,
-                'message' => 'Filter otomatis berhasil dijalankan',
-                'data' => $kandidat
+                'data' => $result
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Error Filter: " . $e->getMessage());
+            Log::error("Filter Kandidat Error: " . $e->getMessage());
             return response()->json([
-                'status' => false,
-                'message' => 'Terjadi kesalahan server.',
-                'error_detail' => $e->getMessage()
+                'status' => false, 
+                'message' => 'Kesalahan Server: ' . $e->getMessage()
             ], 500);
         }
     }
 
     /**
      * 3. SIMPAN PENDAFTARAN (STORE)
-     * Ditambahkan: Notifikasi pendaftaran berhasil dikirim.
+     * VERSI TERBARU: Fleksibel menangkap ID User maupun ID Warga untuk mencegah Error 422.
      */
     public function store(Request $request)
-    {
-        $programId = $request->program_bantuan_id ?? $request->program_id;
-        $request->merge(['program_bantuan_id' => $programId]);
+{
+    $validator = Validator::make($request->all(), [
+        'warga_id' => 'required',
+        'program_id' => 'required'
+    ]);
 
-        $validator = Validator::make($request->all(), [
-            'warga_id'           => 'required|exists:users,id',
-            'program_bantuan_id' => 'required|exists:program_bantuans,id', 
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        try {
-            // PERBAIKAN LOGIKA: Cari data di tabel wargas berdasarkan user_id yang dikirim
-            $wargaRecord = Warga::where('user_id', $request->warga_id)->first();
-
-            if (!$wargaRecord) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Profil Warga tidak ditemukan. Silakan isi profil terlebih dahulu.'
-                ], 422);
-            }
-
-            // Gunakan ID dari tabel wargas untuk pengecekan seleksi
-            $cek = Seleksi::where('warga_id', $wargaRecord->id)
-                          ->where('program_bantuan_id', $programId)
-                          ->first();
-
-            if ($cek) {
-                return response()->json([
-                    'status' => false, 
-                    'message' => 'Warga ini sudah terdaftar di program ini.'
-                ], 409);
-            }
-
-            $seleksi = Seleksi::create([
-                'warga_id'           => $wargaRecord->id, // Menggunakan ID asli dari tabel wargas
-                'program_bantuan_id' => $programId, 
-                'status'             => 1,
-            ]);
-
-            // --- TAMBAHKAN NOTIFIKASI DISINI ---
-            $namaProgram = ProgramBantuan::find($programId)->nama_program ?? 'Program Bantuan';
-            Notifikasi::create([
-                'user_id' => $request->warga_id, // Tetap gunakan user_id agar notif muncul di akun warga
-                'pesan'   => "Pendaftaran Anda untuk " . $namaProgram . " telah berhasil dikirim dan sedang menunggu tinjauan Kades.",
-                'is_read' => false
-            ]);
-
-            return response()->json([
-                'status'  => true,
-                'message' => 'Warga berhasil didaftarkan.',
-                'data'    => $seleksi
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
-        }
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
     }
 
+    try {
+        // Cari profil warga berdasarkan ID User (karena React kirim user_id)
+        $warga = Warga::where('user_id', $request->warga_id)->first();
+        
+        if (!$warga) {
+            // Jika tidak ketemu, coba cari berdasarkan ID Warga langsung
+            $warga = Warga::find($request->warga_id);
+        }
+        
+        if (!$warga) {
+            return response()->json(['status' => false, 'message' => 'Profil Warga tidak ditemukan.'], 422);
+        }
+
+        // SIMPAN: Hapus bagian 'alasan' agar tidak error SQL
+        $seleksi = Seleksi::updateOrCreate(
+            [
+                'warga_id' => $warga->id, 
+                'program_bantuan_id' => $request->program_id
+            ],
+            [
+                'status' => 1 // Hanya status saja, karena kolom 'alasan' tidak ada di DB
+            ]
+        );
+
+        return response()->json(['status' => true, 'message' => 'Berhasil mendaftarkan warga'], 201);
+
+    } catch (\Exception $e) {
+        return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+    }
+}
     /**
-     * 4. UPDATE STATUS
-     * Ditambahkan: Notifikasi perubahan status (Disetujui/Ditolak).
+     * 4. UPDATE STATUS (DISETUJUI/DITOLAK)
      */
     public function update(Request $request, $id)
     {
-        // Gunakan with untuk mengambil info program agar bisa dimasukkan ke pesan notif
-        $seleksi = Seleksi::with('programBantuan')->find($id);
-
-        if (!$seleksi) {
-            return response()->json(['message' => 'Data seleksi tidak ditemukan.'], 404);
-        }
-
         try {
-            $seleksi->update([
-                'status' => $request->status 
-            ]);
+            $seleksi = Seleksi::findOrFail($id);
+            $seleksi->update(['status' => $request->status]);
 
-            // --- LOGIKA NOTIFIKASI OTOMATIS ---
+            // Kirim Notifikasi ke Warga
             $statusTeks = $request->status == 2 ? 'DISETUJUI' : 'DITOLAK';
-            $namaProgram = $seleksi->programBantuan->nama_program ?? 'Program Bantuan';
-            
-            // Cari user_id dari tabel warga untuk mengirim notif
             $warga = Warga::find($seleksi->warga_id);
+            
             if ($warga) {
                 Notifikasi::create([
                     'user_id' => $warga->user_id,
-                    'pesan'   => "Pembaruan: Pengajuan Anda untuk " . $namaProgram . " telah " . $statusTeks . " oleh Kepala Desa.",
+                    'pesan' => "Update Bantuan: Pengajuan Anda telah " . $statusTeks . " oleh Kepala Desa.",
                     'is_read' => false
                 ]);
             }
 
-            return response()->json([
-                'status'  => true,
-                'message' => 'Status seleksi diperbarui dan notifikasi dikirim!',
-                'data'    => $seleksi
-            ], 200);
-
+            return response()->json(['status' => true, 'message' => 'Status berhasil diperbarui']);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Gagal update', 'error' => $e->getMessage()], 500);
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -202,11 +210,11 @@ class SeleksiController extends Controller
      */
     public function destroy($id)
     {
-        $seleksi = Seleksi::find($id);
-        if ($seleksi) {
-            $seleksi->delete();
-            return response()->json(['status' => true, 'message' => 'Data seleksi dihapus']);
+        try {
+            Seleksi::destroy($id);
+            return response()->json(['status' => true, 'message' => 'Data berhasil dihapus']);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'Data tidak ditemukan'], 404);
     }
 }

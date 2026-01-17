@@ -27,28 +27,22 @@ class WargaController extends Controller
         $laporan = []; // Untuk menampung hasil debug
 
         foreach ($users as $user) {
-            // Coba deteksi nama kolom HP yang benar di tabel users
-            // Kadang programmer menamakannya: no_telp, no_hp, phone, atau nomor_hp
             $hp_dari_user = $user->no_telp ?? $user->no_hp ?? $user->phone ?? $user->nomor_hp ?? null;
-            
-            // Cek data alamat
             $alamat_dari_user = $user->alamat;
 
-            // Simpan ke array laporan untuk dicek nanti
             $laporan[] = [
                 'nama' => $user->name,
                 'sumber_hp_di_user' => $hp_dari_user ? $hp_dari_user : 'KOSONG (Cek tabel users!)',
                 'sumber_alamat_di_user' => $alamat_dari_user
             ];
 
-            // LOGIKA UPDATE / CREATE (FORCE REPLACE)
             Warga::updateOrCreate(
-                ['user_id' => $user->id], // Kunci pencarian
+                ['user_id' => $user->id], 
                 [
                     'nama'       => $user->name,
                     'nik'        => $user->nik ?? '000000000000',
                     'alamat'     => $alamat_dari_user ?? 'Alamat Belum Diisi',
-                    'nomor_hp'   => $hp_dari_user ?? '08...', // Isi default jika kosong
+                    'nomor_hp'   => $hp_dari_user ?? '08...', 
                     'gaji'       => $user->gaji ?? 0,
                     'tanggungan' => $user->tanggungan ?? 0,
                     'pekerjaan'  => $user->pekerjaan ?? '-',
@@ -60,17 +54,22 @@ class WargaController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Sinkronisasi Paksa Selesai.',
-            'debug_data_sumber' => $laporan // <--- Perhatikan bagian ini di browser nanti
+            'debug_data_sumber' => $laporan 
         ]);
     }
 
     public function index()
     {
-        $data = User::where('role', 'warga')->latest()->get();
-        // Transformasi data agar nama field sesuai frontend
+        // MODIFIKASI: Mengambil data dari tabel User tapi menyertakan data dari tabel Warga (termasuk foto)
+        $data = User::where('role', 'warga')->with('warga')->latest()->get();
+        
         $data->transform(function($item) {
             $item->nama = $item->name;
-            return $item;
+            // Ambil foto dari tabel wargas jika ada
+            $item->foto_profile = $item->warga && $item->warga->foto 
+            ? asset('uploads/profil/' . $item->warga->foto) . '?v=' . time() 
+            : null;
+                        return $item;
         });
         
         return response()->json([
@@ -82,14 +81,18 @@ class WargaController extends Controller
 
     public function show($id)
     {
-        $warga = User::where('role', 'warga')->find($id);
+        // MODIFIKASI: Tambahkan with('warga') agar foto terbawa
+        $warga = User::where('role', 'warga')->with('warga')->find($id);
 
         if (!$warga) {
             return response()->json(['status' => false, 'message' => 'Data warga tidak ditemukan'], 404);
         }
 
         $warga->nama = $warga->name;
-
+        $warga->foto_profile = $warga->warga && $warga->warga->foto 
+        ? asset('uploads/profil/' . $warga->warga->foto) . '?v=' . time() 
+        : null;
+        
         return response()->json([
             'status' => true,
             'data' => $warga
@@ -98,7 +101,6 @@ class WargaController extends Controller
 
     public function store(Request $request)
     {
-        // 1. Validasi
         $validator = Validator::make($request->all(), [
             'nama'       => 'required|string', 
             'nik'        => 'required|numeric|unique:users,nik',
@@ -114,9 +116,7 @@ class WargaController extends Controller
         }
 
         try {
-            // 2. Gunakan DB Transaction agar aman
             $result = DB::transaction(function () use ($request) {
-                // A. Simpan ke tabel USERS
                 $user = User::create([
                     'name'       => $request->nama,           
                     'nik'        => $request->nik,
@@ -129,15 +129,14 @@ class WargaController extends Controller
                     'password'   => Hash::make('123456'), 
                 ]);
 
-                // B. Simpan ke tabel WARGAS (PERBAIKAN: Masukkan Alamat & HP)
                 Warga::create([
                     'user_id'        => $user->id,
                     'nama'           => $user->name,
                     'nik'            => $user->nik,
                     'gaji'           => $user->gaji,
                     'tanggungan'     => $user->tanggungan,
-                    'alamat'         => $request->alamat, // <--- Perbaikan
-                    'nomor_hp'       => $request->no_telp, // <--- Perbaikan (sesuai input request)
+                    'alamat'         => $request->alamat, 
+                    'nomor_hp'       => $request->no_telp, 
                     'status_seleksi' => 'Belum Terdaftar' 
                 ]);
 
@@ -156,7 +155,6 @@ class WargaController extends Controller
         $warga = User::find($id);
         if (!$warga) return response()->json(['status' => false, 'message' => 'Warga tidak ditemukan'], 404);
 
-        // Logic alamat custom 
         $alamatBaru = $warga->alamat;
         if($request->dukuh && $request->rt && $request->rw) {
              $alamatBaru = "Dukuh " . $request->dukuh . ", RT " . $request->rt . ", RW " . $request->rw;
@@ -164,7 +162,6 @@ class WargaController extends Controller
              $alamatBaru = $request->alamat;
         }
 
-        // Update User
         $warga->update([
             'name'       => $request->nama ?? $warga->name,
             'nik'        => $request->nik ?? $warga->nik,
@@ -175,7 +172,6 @@ class WargaController extends Controller
             'alamat'     => $alamatBaru,
         ]);
 
-        // Sinkronisasi ke tabel Wargas juga (PERBAIKAN: Tambah Alamat & HP)
         Warga::updateOrCreate(
             ['user_id' => $warga->id],
             [
@@ -183,8 +179,8 @@ class WargaController extends Controller
                 'nik'        => $warga->nik,
                 'gaji'       => $warga->gaji,
                 'tanggungan' => $warga->tanggungan,
-                'alamat'     => $warga->alamat,   // <--- Perbaikan
-                'nomor_hp'   => $warga->no_telp   // <--- Perbaikan
+                'alamat'     => $warga->alamat,   
+                'nomor_hp'   => $warga->no_telp   
             ]
         );
 
@@ -197,8 +193,7 @@ class WargaController extends Controller
         if (!$warga) return response()->json(['status' => false, 'message' => 'Warga tidak ditemukan'], 404);
 
         $warga->delete();
-        // Opsional: Hapus juga di tabel wargas jika mau hard delete
-        // Warga::where('user_id', $id)->delete();
+        Warga::where('user_id', $id)->delete();
         
         return response()->json(['status' => true, 'message' => 'Warga berhasil dihapus']);
     }
@@ -213,7 +208,6 @@ class WargaController extends Controller
             $user = Auth::user(); 
             if (!$user) return response()->json(['status' => false, 'pesan' => 'User tidak valid'], 401);
 
-            // 1. Cek Penyaluran (Pencairan)
             $penyaluran = Penyaluran::whereHas('seleksi', function($query) use ($user) {
                 $query->whereHas('warga', function($q) use ($user) {
                     $q->where('user_id', $user->id);
@@ -229,7 +223,6 @@ class WargaController extends Controller
                 ]);
             }
 
-            // 2. Cek Seleksi
             $wargaRecord = Warga::where('user_id', $user->id)->first();
             $wargaId = $wargaRecord ? $wargaRecord->id : null;
 
@@ -244,7 +237,6 @@ class WargaController extends Controller
             if ($seleksi) {
                 $namaProgram = $seleksi->programBantuan->nama_program ?? 'Bansos';
                 
-                // Status 2 = Disetujui, 3 = Ditolak
                 if ($seleksi->status == 2) { 
                     return response()->json([
                         'status' => true, 'tahap' => 'lolos',
@@ -266,7 +258,6 @@ class WargaController extends Controller
                 }
             }
 
-            // Jika benar-benar tidak ada data
             return response()->json([
                 'status' => false, 'tahap' => 'kosong',
                 'pesan' => 'Belum ada data bantuan atau pengajuan.', 'program' => '-'
@@ -296,7 +287,6 @@ class WargaController extends Controller
         if ($validator->fails()) return response()->json(['status' => false, 'errors' => $validator->errors()], 422);
 
         try {
-            // Update User
             $currentUser->alamat = $request->alamat;
             $currentUser->no_telp = $request->no_telp;
             
@@ -304,22 +294,31 @@ class WargaController extends Controller
             if ($request->has('pekerjaan'))  $currentUser->pekerjaan = $request->pekerjaan;
             if ($request->has('tanggungan')) $currentUser->tanggungan = $request->tanggungan;
 
+            // Update Foto ke tabel Warga agar Tabel Warga punya datanya
+            $warga = Warga::where('user_id', $currentUser->id)->first();
+            
             if ($request->hasFile('foto')) {
                 $path = public_path('uploads/profil');
                 if (!File::isDirectory($path)) File::makeDirectory($path, 0777, true, true);
-                // Hapus foto lama jika ada
-                if ($currentUser->foto && File::exists($path . '/' . $currentUser->foto)) {
-                    File::delete($path . '/' . $currentUser->foto);
+                
+                // Hapus foto lama di tabel warga jika ada
+                if ($warga && $warga->foto && File::exists($path . '/' . $warga->foto)) {
+                    File::delete($path . '/' . $warga->foto);
                 }
+
                 $file = $request->file('foto');
                 $filename = time() . '_' . $currentUser->id . '.' . $file->getClientOriginalExtension();
                 $file->move($path, $filename);
-                $currentUser->foto = $filename;
+                
+                // Simpan nama file ke tabel Warga
+                if($warga) {
+                    $warga->foto = $filename;
+                    $warga->save();
+                }
             }
 
             $currentUser->save(); 
 
-            // Update/Create Warga (Sync Data)
             Warga::updateOrCreate(
                 ['user_id' => $currentUser->id], 
                 [
@@ -327,38 +326,27 @@ class WargaController extends Controller
                     'nik'        => $currentUser->nik,
                     'gaji'       => $currentUser->gaji ?? 0,
                     'tanggungan' => $currentUser->tanggungan ?? 0,
-                    'alamat'     => $currentUser->alamat,    // <--- Perbaikan: Sync Alamat
-                    'nomor_hp'   => $currentUser->no_telp    // <--- Perbaikan: Sync HP
+                    'alamat'     => $currentUser->alamat,    
+                    'nomor_hp'   => $currentUser->no_telp    
                 ]
             );
 
             return response()->json([
                 'status' => true,
-                'message' => 'Profil berhasil diperbarui dan disinkronkan!',
+                'message' => 'Profil berhasil diperbarui!',
                 'user' => $currentUser
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Server Error saat update profil',
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['status' => false, 'message' => 'Error', 'error' => $e->getMessage()], 500);
         }
     }
 
-    // =================================================================
-    // BAGIAN BARU: KHUSUS DASHBOARD (KOTAK MERAH)
-    // =================================================================
     public function checkStatus(Request $request)
     {
-        // 1. Ambil user yang sedang login
         $user = Auth::user();
-
-        // 2. Ambil data dari tabel 'wargas'
         $warga = Warga::where('user_id', $user->id)->first();
 
-        // 3. Jika data warga belum ada
         if (!$warga) {
             return response()->json([
                 'status' => 'belum_daftar',
@@ -367,13 +355,11 @@ class WargaController extends Controller
             ]);
         }
 
-        // 4. Kirim data Status
         return response()->json([
             'status' => 'sudah_daftar',
             'data' => [
                 'nama'              => $warga->nama,
                 'status_seleksi'    => $warga->status_seleksi ?? 'Belum Terdaftar',
-                // Tanggal pengajuan diambil dari created_at warga untuk saat ini
                 'tanggal_pengajuan' => $warga->created_at->format('Y-m-d'), 
             ]
         ]);

@@ -1,144 +1,173 @@
-/* --- LAYOUT UTAMA --- */
+/* Container & Layout */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Membagi 2 kolom jika layar lebar */
-    gap: 24px;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 30px;
+    align-items: start;
 }
 
-/* Responsif untuk layar kecil */
-@media (max-width: 768px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr; /* Jadi 1 kolom di HP */
-    }
-}
-
-/* --- KARTU SPESIAL: Status Bantuan --- */
-.hero-status-card {
-    background: white;
-    border-radius: 20px;
-    padding: 30px;
+/* Hero Status Card (Kiri) */
+.status-hero-card {
+    background: #ffffff;
+    border-radius: 28px;
+    padding: 40px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    border: 1px solid rgba(0,0,0,0.02);
-    transition: transform 0.3s ease;
-    min-height: 200px; /* Tinggi minimum agar terlihat gagah */
+    min-height: 400px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+    border: 1px solid #f1f5f9;
 }
 
-.hero-status-card:hover {
-    transform: translateY(-5px);
-}
-
-/* Hiasan background abstrak default (Orange/Pending) */
-.hero-status-card::before {
-    content: '';
-    position: absolute;
-    top: -50px;
-    right: -50px;
-    width: 150px;
-    height: 150px;
-    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
-    border-radius: 50%;
-    opacity: 0.1;
-    z-index: 0;
-}
-
-/* Teks Status */
-.status-label {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-bottom: 8px;
-    font-weight: 600;
-    position: relative;
-    z-index: 1;
-}
-
-.status-value {
-    font-size: 2.5rem;
-    font-weight: 800;
-    position: relative;
-    z-index: 1;
-    /* Default: Orange Gradient */
-    background: -webkit-linear-gradient(45deg, #f59e0b, #d97706);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* --- VARIASI WARNA STATUS (TAMBAHAN) --- */
-
-/* 1. Status: DISETUJUI (Hijau) */
-.hero-status-card.status-success::before {
-    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
-}
-.hero-status-card.status-success .status-value {
-    background: -webkit-linear-gradient(45deg, #34d399, #059669);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* 2. Status: DITOLAK (Merah) */
-.hero-status-card.status-danger::before {
-    background: linear-gradient(135deg, #f87171 0%, #dc2626 100%);
-}
-.hero-status-card.status-danger .status-value {
-    background: -webkit-linear-gradient(45deg, #f87171, #dc2626);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* 3. Status: BELUM ADA (Abu/Biru) */
-.hero-status-card.status-neutral::before {
-    background: linear-gradient(135deg, #9ca3af 0%, #4b5563 100%);
-}
-.hero-status-card.status-neutral .status-value {
-    background: none;
-    -webkit-text-fill-color: #374151; /* Warna solid gelap */
-    font-size: 1.5rem; /* Lebih kecil sedikit */
-}
-
-/* --- KARTU INFO (Bawah/Samping) --- */
-.info-box {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-    border-left: 6px solid #3b82f6; /* Aksen garis biru */
-    height: 100%;
-}
-
-.info-box h3 {
-    font-size: 1.25rem;
+.badge-status-top {
+    background: rgba(0,0,0,0.05);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 0.75rem;
     font-weight: 700;
-    color: #1f2937;
-    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.info-list {
-    padding-left: 1rem;
-    color: #4b5563;
+.status-icon-bg {
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    font-size: 12rem;
+    opacity: 0.05;
+    transform: rotate(-15deg);
 }
 
-.info-list li {
-    margin-bottom: 0.5rem;
-}
-
-/* Tombol CTA di dalam kartu */
-.btn-cta {
-    margin-top: 10px;
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #2563eb;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
+.status-content label {
+    font-size: 0.9rem;
+    color: #64748b;
     font-weight: 600;
-    border: none;
-    transition: background 0.2s;
+    display: block;
+    margin-bottom: 10px;
 }
-.btn-cta:hover {
-    background-color: #1d4ed8;
+
+.status-content h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 20px;
+}
+
+.status-content p {
+    font-size: 1.1rem;
+    color: #475569;
+    max-width: 80%;
+}
+
+/* Footer Data Card */
+.status-footer-data {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 30px;
+    border-top: 2px solid #f8fafc;
+}
+
+.data-item small { color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; }
+.data-item p { color: #1e293b; font-weight: 800; font-size: 1.1rem; margin: 0; }
+
+/* Status Color Variations */
+.status-pending h1 { color: #f59e0b; }
+.status-success { border-bottom: 8px solid #10b981; }
+.status-success h1 { color: #10b981; }
+.status-danger h1 { color: #ef4444; }
+
+/* Empty State Card */
+.empty-state-card {
+    background: white;
+    padding: 60px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #3b82f6;
+    margin-bottom: 20px;
+    background: #eff6ff;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+}
+
+.btn-main-action {
+    background: #1e293b;
     color: white;
+    border: none;
+    padding: 14px 35px;
+    border-radius: 14px;
+    font-weight: 700;
+    transition: 0.3s;
+}
+
+.btn-main-action:hover { background: #334155; transform: scale(1.05); }
+
+/* Right Panel Info */
+.requirement-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+    margin-bottom: 20px;
+}
+
+.card-top { display: flex; align-items: center; gap: 15px; margin-bottom: 25px; }
+.card-top i { font-size: 1.8rem; color: #3b82f6; }
+.card-top h5 { margin: 0; font-weight: 800; color: #1e293b; }
+
+.modern-list { list-style: none; padding: 0; }
+.modern-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 18px;
+    font-size: 0.95rem;
+    color: #475569;
+}
+
+.list-dot {
+    width: 8px;
+    height: 8px;
+    background: #3b82f6;
+    border-radius: 50%;
+    margin-top: 7px;
+    flex-shrink: 0;
+}
+
+.quick-help-card {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    padding: 25px;
+    border-radius: 24px;
+    text-align: center;
+    color: white;
+}
+
+.btn-outline-help {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    backdrop-filter: blur(5px);
+}
+
+/* Animations */
+.animate-fade-in { animation: fadeIn 0.6s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Mobile */
+@media (max-width: 991px) {
+    .dashboard-grid { grid-template-columns: 1fr; }
+    .status-hero-card { min-height: auto; }
+    .status-content h1 { font-size: 2.2rem; }
 }

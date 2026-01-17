@@ -1,14 +1,25 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  FileCheck, 
+  UserCheck, 
+  XCircle, 
+  Info, 
+  Users, 
+  Fingerprint, 
+  ClipboardList,
+  Search
+} from "lucide-react";
 import DetailWarga from "../pagesadmin/DetailWarga"; 
-
-// IMPORT FILE CSS DISINI
 import "./Persetujuan.css"; 
 
 function Persetujuan() {
     const [approvalList, setApprovalList] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedWarga, setSelectedWarga] = useState(null); 
     const [selectedIds, setSelectedIds] = useState([]); 
+    const [searchTerm, setSearchTerm] = useState("");
     const token = localStorage.getItem("token"); 
 
     useEffect(() => {
@@ -16,24 +27,40 @@ function Persetujuan() {
     }, []);
 
     const fetchDataPersetujuan = async () => {
+        setLoading(true);
         try {
             const response = await axios.get("http://127.0.0.1:8000/api/seleksi", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            const allData = Array.isArray(response.data) ? response.data : (response.data.data || []);
-            const pending = allData.filter(item => item.status == 1); // 1 = Menunggu
+            const rawData = response.data.data || [];
+            
+            // Filter: Hanya status 1 (Menunggu) DAN bukan akun Admin/Kades
+            const pending = rawData.filter(item => {
+                const nama = (item.nama_warga || item.warga?.nama || "").toLowerCase();
+                const isPending = String(item.status) === "1";
+                const isNotStaff = !nama.includes("admin") && !nama.includes("kades") && !nama.includes("desa");
+                return isPending && isNotStaff;
+            });
             
             setApprovalList(pending);
             setSelectedIds([]); 
         } catch (error) {
-            console.error("Gagal ambil data persetujuan", error);
+            console.error("Gagal ambil data persetujuan:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
+    // Filter pencarian untuk memudahkan Kades
+    const filteredList = approvalList.filter(item => 
+        (item.nama_warga || item.warga?.nama || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.nik || item.warga?.nik || "").includes(searchTerm)
+    );
+
     const handleSelectAll = (e) => {
         if (e.target.checked) {
-            const allIds = approvalList.map(item => item.id);
+            const allIds = filteredList.map(item => item.id);
             setSelectedIds(allIds);
         } else {
             setSelectedIds([]);
@@ -61,95 +88,126 @@ function Persetujuan() {
             alert(`Berhasil ${actionName} ${selectedIds.length} data!`);
             fetchDataPersetujuan();
         } catch (error) {
-            console.error("Bulk Error:", error);
             alert("Beberapa data gagal diproses.");
         }
     };
 
     return (
-        <div className="container-fluid px-4 mt-4">
-            <div className="card shadow-sm border-0 rounded-3 overflow-hidden">
-                
-                {/* Header Menggunakan Class CSS */}
-                <div className="card-header persetujuan-header p-4 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 className="mb-1 fw-bold">
-                            <i className="bi bi-file-earmark-check me-2"></i>
-                            Persetujuan Kepala Desa
-                        </h4>
-                        <small className="text-white-50">Validasi data warga sebelum penyaluran bantuan.</small>
+        <motion.div 
+            initial={{ opacity: 0, y: 10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            className="persetujuan-container p-4"
+        >
+            {/* Header Page */}
+            <div className="page-header mb-4 d-flex justify-content-between align-items-end">
+                <div>
+                    <h2 className="fw-bold text-dark mb-1">Persetujuan Kepala Desa</h2>
+                    <p className="text-muted mb-0">Validasi dan verifikasi kelayakan warga penerima bantuan.</p>
+                </div>
+                <div className="stats-badge shadow-sm">
+                    <Users size={18} className="text-primary" />
+                    <span>{approvalList.length} Menunggu Verifikasi</span>
+                </div>
+            </div>
+
+            <div className="custom-card-navy shadow-sm border-0">
+                {/* Header Card dengan Gradient Navy */}
+                <div className="custom-card-header d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center gap-2">
+                        <FileCheck size={22} className="text-white" />
+                        <h5 className="m-0 text-white fw-bold">Daftar Tunggu Persetujuan</h5>
                     </div>
-                    
-                    {/* Tombol Aksi Massal */}
-                    {selectedIds.length > 0 && (
-                        <div className="d-flex gap-2">
-                            <button onClick={() => handleBulkAction(2)} className="btn btn-light text-primary fw-bold shadow-sm px-3">
-                                <i className="bi bi-check-lg me-1"></i> Setujui ({selectedIds.length})
-                            </button>
-                            
-                            <button onClick={() => handleBulkAction(3)} className="btn btn-outline-light fw-bold px-3 btn-hover-danger">
-                                <i className="bi bi-x-lg me-1"></i> Tolak ({selectedIds.length})
-                            </button>
-                        </div>
-                    )}
+
+                    {/* Tombol Aksi Massal dengan Animasi */}
+                    <AnimatePresence>
+                        {selectedIds.length > 0 && (
+                            <motion.div 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                className="d-flex gap-2"
+                            >
+                                <button onClick={() => handleBulkAction(2)} className="btn-action-success">
+                                    <UserCheck size={18} /> Setujui ({selectedIds.length})
+                                </button>
+                                <button onClick={() => handleBulkAction(3)} className="btn-action-danger">
+                                    <XCircle size={18} /> Tolak
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
-                <div className="card-body p-0">
-                    {approvalList.length === 0 ? (
+                <div className="custom-card-body p-0">
+                    {/* Toolbar Search */}
+                    <div className="p-3 border-bottom bg-light d-flex justify-content-end">
+                        <div className="search-wrapper">
+                            <Search size={18} className="search-icon" />
+                            <input 
+                                type="text" 
+                                placeholder="Cari Nama atau NIK..." 
+                                className="form-control search-input"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
+                    {loading ? (
                         <div className="text-center py-5">
-                            <div className="mb-3">
-                                <i className="bi bi-clipboard-check empty-state-icon"></i>
-                            </div>
-                            <h5 className="text-muted fw-normal">Tidak ada data yang perlu persetujuan saat ini.</h5>
+                            <div className="spinner-border text-primary" role="status"></div>
+                            <p className="mt-3 text-muted fw-medium">Menyinkronkan data...</p>
+                        </div>
+                    ) : filteredList.length === 0 ? (
+                        <div className="text-center py-5">
+                            <Info size={48} className="text-muted mb-3 opacity-50" />
+                            <h5 className="text-muted fw-normal">Tidak ada data warga yang perlu divalidasi.</h5>
                         </div>
                     ) : (
                         <div className="table-responsive">
-                            <table className="table table-hover align-middle mb-0">
-                                <thead className="table-light text-secondary small text-uppercase">
+                            <table className="table table-modern align-middle mb-0">
+                                <thead>
                                     <tr>
-                                        <th className="ps-4 py-3">Nama Warga</th>
-                                        <th className="py-3">NIK</th>
-                                        <th className="py-3">Program Bantuan</th>
-                                        <th className="text-end pe-4 py-3 col-action-width">
+                                        <th className="ps-4">Nama Warga</th>
+                                        <th><div className="d-flex align-items-center gap-2"><Fingerprint size={16}/> NIK</div></th>
+                                        <th><div className="d-flex align-items-center gap-2"><ClipboardList size={16}/> Program</div></th>
+                                        <th className="text-end pe-4">
                                             <div className="d-flex justify-content-end align-items-center gap-2">
-                                                <span className="fw-bold small">Pilih Semua</span>
+                                                <span className="small fw-bold text-muted">PILIH SEMUA</span>
                                                 <input 
                                                     type="checkbox" 
-                                                    className="form-check-input border-secondary m-0 custom-checkbox"
+                                                    className="form-check-input custom-checkbox"
                                                     onChange={handleSelectAll}
-                                                    checked={selectedIds.length === approvalList.length && approvalList.length > 0}
+                                                    checked={selectedIds.length === filteredList.length && filteredList.length > 0}
                                                 />
                                             </div>
                                         </th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {approvalList.map((item) => (
-                                        <tr 
-                                            key={item.id} 
-                                            onClick={() => setSelectedWarga(item.warga || item)} 
-                                            className="cursor-pointer"
-                                        >
-                                            <td className="ps-4 py-3">
-                                                <div className="fw-bold text-dark">{item.warga?.nama || item.warga?.name || "Tanpa Nama"}</div>
-                                                <small className="text-muted">Klik untuk detail</small>
+                                    {filteredList.map((item) => (
+                                        <tr key={item.id} className="row-hoverable">
+                                            <td className="ps-4 py-3" onClick={() => setSelectedWarga(item.warga || item)}>
+                                                <div className="fw-bold text-dark text-capitalize">
+                                                    {item.nama_warga || item.warga?.nama || "Nama Tidak Terdaftar"}
+                                                </div>
+                                                <div className="detail-trigger">Klik untuk verifikasi profil &raquo;</div>
                                             </td>
-                                            <td className="text-secondary font-monospace">{item.warga?.nik || "-"}</td>
+                                            <td className="text-secondary font-monospace">
+                                                {item.nik || item.warga?.nik || "-"}
+                                            </td>
                                             <td>
-                                                <span className="badge-custom-blue">
-                                                    {item.program_bantuan?.nama_program || "Bantuan"}
+                                                <span className="badge-program">
+                                                    {item.nama_program || item.program_bantuan?.nama_program || "Bantuan"}
                                                 </span>
                                             </td>
-                                            
-                                            <td className="pe-4 text-end" onClick={(e) => e.stopPropagation()}> 
-                                                <div className="d-flex justify-content-end">
-                                                    <input 
-                                                        type="checkbox" 
-                                                        className="form-check-input border-secondary m-0 custom-checkbox-lg"
-                                                        checked={selectedIds.includes(item.id)}
-                                                        onChange={() => handleCheckboxChange(item.id)}
-                                                    />
-                                                </div>
+                                            <td className="pe-4 text-end"> 
+                                                <input 
+                                                    type="checkbox" 
+                                                    className="form-check-input custom-checkbox"
+                                                    checked={selectedIds.includes(item.id)}
+                                                    onChange={() => handleCheckboxChange(item.id)}
+                                                />
                                             </td>
                                         </tr>
                                     ))}
@@ -158,11 +216,12 @@ function Persetujuan() {
                         </div>
                     )}
                 </div>
-                <div className="card-footer bg-light small text-muted text-center py-3 border-top-0">
-                    Menampilkan {approvalList.length} data yang menunggu persetujuan.
+                <div className="card-footer-custom">
+                    Menampilkan <strong>{filteredList.length}</strong> dari {approvalList.length} warga yang menunggu.
                 </div>
             </div>
 
+            {/* Modal Detail */}
             {selectedWarga && (
                 <DetailWarga 
                     data={selectedWarga} 
@@ -170,7 +229,7 @@ function Persetujuan() {
                     readOnly={true} 
                 />
             )}
-        </div>
+        </motion.div>
     );
 }
 

@@ -28,6 +28,7 @@ Route::get('/wilayah-desa', [AuthController::class, 'getDataWilayah']);
 // Ditaruh disini agar bisa dijalankan lewat browser
 Route::get('/sync-warga', [WargaController::class, 'syncAllWarga']);
 
+
 // Master Data Program (Sementara Public untuk Testing Frontend)
 Route::get('/program', [ProgramBantuanController::class, 'index']);
 Route::post('/program', [ProgramBantuanController::class, 'store']);
@@ -79,4 +80,6 @@ Route::middleware('auth:sanctum')->group(function () {
                     ->update(['is_read' => true]);
         return response()->json(['status' => true, 'message' => 'Notifikasi ditandai dibaca']);
     });
+
+    
 });
