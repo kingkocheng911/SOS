@@ -158,10 +158,6 @@ const BerandaWarga = ({ setActiveTab }) => {
                     </ul>
                 </div>
 
-                <div className="quick-help-card">
-                    <p>Butuh bantuan lebih lanjut?</p>
-                    <button className="btn-outline-help">Hubungi Admin Desa</button>
-                </div>
             </div>
         </div>
     );

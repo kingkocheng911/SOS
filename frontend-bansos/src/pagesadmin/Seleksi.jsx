@@ -229,8 +229,8 @@ function Seleksi() {
                    {listSeleksi.length > 0 ? (
   listSeleksi.map((item, index) => {
     // 1. Perbaikan: Ambil nama dari objek warga atau user dengan aman
-    const namaPenerima = item.warga?.nama || item.warga?.name || "Data Warga Hilang";
-    const namaProgram = item.program_bantuan?.nama_program || item.program_bantuan?.nama || "Program Tidak Diketahui";
+    const namaPenerima = item.warga?.nama || "Data Warga Hilang"; 
+const namaProgram = item.program_bantuan?.nama_program || "Program Tidak Diketahui";
     
     // 2. Perbaikan: Validasi Tanggal agar tidak muncul "Invalid Date"
     const formatTanggal = (dateString) => {
