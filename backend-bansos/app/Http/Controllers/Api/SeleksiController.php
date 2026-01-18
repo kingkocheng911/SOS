@@ -16,63 +16,81 @@ class SeleksiController extends Controller
 {
     /**
      * 1. DAFTAR DATA SELEKSI (PERSETUJUAN KADES)
-     * Menggunakan pengecekan manual agar tidak crash jika ada data relasi yang hilang.
+     * LOGIKA: Hanya tampilkan data jika User, Warga, dan Program SEMUANYA ADA.
+     * Jika ada yang hilang, data seleksi tersebut di-skip (tidak dimunculkan).
      */
     public function index()
     {
         try {
-            $seleksis = Seleksi::all();
-            $result = [];
+            $rawSeleksis = Seleksi::orderBy('created_at', 'desc')->get();
+            $cleanData = [];
 
-            foreach ($seleksis as $s) {
-                // Ambil data profil warga
+            foreach ($rawSeleksis as $s) {
+                // 1. Cek Warga
                 $warga = Warga::find($s->warga_id);
-                if (!$warga) continue;
+                if (!$warga) continue; 
 
-                // Ambil data user terkait
+                // 2. Cek User
                 $user = User::find($warga->user_id);
-                if (!$user || $user->role !== 'warga') continue;
+                if (!$user) continue; 
 
-                // Ambil data program
+                // 3. Cek Program
                 $program = ProgramBantuan::find($s->program_bantuan_id);
+                if (!$program && isset($s->program_id)) {
+                    $program = ProgramBantuan::find($s->program_id);
+                }
+                if (!$program) continue; 
 
-                $result[] = [
+                // --- DATA LENGKAP UNTUK POPUP ---
+                $cleanData[] = [
                     'id' => $s->id,
-                    'nama_warga' => $user->name ?? 'Anonim',
-                    'nik' => $user->nik ?? '-',
-                    'nama_program' => $program->nama_program ?? 'Program Dihapus',
                     'status' => $s->status,
-                    'created_at' => $s->created_at ? $s->created_at->format('d/m/Y') : '-'
+                    'created_at' => $s->created_at,
+                    'updated_at' => $s->updated_at,
+                    
+                    'warga' => [
+                        'id' => $warga->id,
+                        'user_id' => $warga->user_id,
+                        
+                        // Data Dasar
+                        'nama' => $user->name,
+                        'nik' => $user->nik,
+                        'foto' => $warga->foto,
+
+                        // --- TAMBAHAN: DATA DETAIL UNTUK POPUP ---
+                        // Pastikan nama kolom ini sesuai dengan tabel 'wargas' Anda
+                        'pekerjaan' => $warga->pekerjaan ?? '-', 
+                        'gaji' => $warga->gaji ?? 0,
+                        'tanggungan' => $warga->tanggungan ?? 0,
+                        'alamat' => $warga->alamat ?? 'Alamat belum diatur',
+                        'no_hp' => $warga->no_hp ?? ($user->email ?? '-'), // Fallback ke email jika no_hp tidak ada
+                        'rt' => $warga->rt ?? '-',
+                        'rw' => $warga->rw ?? '-',
+                    ],
+
+                    'program_bantuan' => [
+                        'id' => $program->id,
+                        'nama_program' => $program->nama_program,
+                        'deskripsi' => $program->deskripsi ?? '-'
+                    ]
                 ];
             }
 
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil mengambil data seleksi',
-                'data' => $result
+                'message' => 'Berhasil mengambil data seleksi lengkap',
+                'data' => $cleanData 
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Seleksi Index Error: " . $e->getMessage());
             return response()->json([
                 'status' => false,
-                'message' => 'Gagal memuat data: ' . $e->getMessage()
+                'message' => 'Gagal: ' . $e->getMessage()
             ], 500);
         }
-
-        $result[] = [
-            'id' => $s->id,
-            'nama_warga' => $user->name ?? 'User Tidak Ditemukan',
-            'nik' => $user->nik ?? '-',
-            'nama_program' => $program->nama_program ?? 'Program Dihapus',
-            'status' => $s->status,
-            'created_at' => $s->created_at ? $s->created_at->format('Y-m-d') : null 
-        ];
     }
-
     /**
      * 2. FILTER KANDIDAT OTOMATIS (Sisi Admin)
-     * MEMPERBAIKI ERROR 500: Mengganti query relasi yang bermasalah dengan logic yang lebih stabil.
      */
     public function filterKandidat(Request $request)
     {
@@ -82,15 +100,12 @@ class SeleksiController extends Controller
                 return response()->json(['status' => false, 'message' => 'Program tidak ditemukan'], 404);
             }
             
-            // Ambil semua user role warga
             $query = User::where('role', 'warga');
 
-            // Filter Gaji (Pastikan kolom gaji ada di tabel users)
             if ($program->maksimal_penghasilan > 0) {
                 $query->where('gaji', '<=', $program->maksimal_penghasilan);
             }
 
-            // Filter Tanggungan (Pastikan kolom tanggungan ada di tabel users)
             if ($program->minimal_tanggungan > 0) {
                 $query->where('tanggungan', '>=', $program->minimal_tanggungan);
             }
@@ -99,11 +114,9 @@ class SeleksiController extends Controller
             $result = [];
 
             foreach ($users as $u) {
-                // Cari data profil warga untuk memastikan mereka terdaftar sebagai warga aktif
                 $warga = Warga::where('user_id', $u->id)->first();
                 if (!$warga) continue;
 
-                // Cek apakah warga ini sudah pernah mendaftar di program ini sebelumnya
                 $sudahDaftar = Seleksi::where('warga_id', $warga->id)
                                      ->where('program_bantuan_id', $program->id)
                                      ->exists();
@@ -125,7 +138,6 @@ class SeleksiController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error("Filter Kandidat Error: " . $e->getMessage());
             return response()->json([
                 'status' => false, 
                 'message' => 'Kesalahan Server: ' . $e->getMessage()
@@ -135,49 +147,48 @@ class SeleksiController extends Controller
 
     /**
      * 3. SIMPAN PENDAFTARAN (STORE)
-     * VERSI TERBARU: Fleksibel menangkap ID User maupun ID Warga untuk mencegah Error 422.
      */
     public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'warga_id' => 'required',
-        'program_id' => 'required'
-    ]);
+    {
+        $validator = Validator::make($request->all(), [
+            'warga_id' => 'required',
+            'program_id' => 'required'
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    try {
-        // Cari profil warga berdasarkan ID User (karena React kirim user_id)
-        $warga = Warga::where('user_id', $request->warga_id)->first();
-        
-        if (!$warga) {
-            // Jika tidak ketemu, coba cari berdasarkan ID Warga langsung
-            $warga = Warga::find($request->warga_id);
-        }
-        
-        if (!$warga) {
-            return response()->json(['status' => false, 'message' => 'Profil Warga tidak ditemukan.'], 422);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // SIMPAN: Hapus bagian 'alasan' agar tidak error SQL
-        $seleksi = Seleksi::updateOrCreate(
-            [
-                'warga_id' => $warga->id, 
-                'program_bantuan_id' => $request->program_id
-            ],
-            [
-                'status' => 1 // Hanya status saja, karena kolom 'alasan' tidak ada di DB
-            ]
-        );
+        try {
+            // Cari profil warga (Cek ID User dulu, lalu ID Warga)
+            $warga = Warga::where('user_id', $request->warga_id)->first();
+            if (!$warga) {
+                $warga = Warga::find($request->warga_id);
+            }
+            
+            if (!$warga) {
+                return response()->json(['status' => false, 'message' => 'Profil Warga tidak ditemukan.'], 422);
+            }
 
-        return response()->json(['status' => true, 'message' => 'Berhasil mendaftarkan warga'], 201);
+            // SIMPAN
+            // Pastikan kolom 'program_bantuan_id' sesuai DB Anda
+            $seleksi = Seleksi::updateOrCreate(
+                [
+                    'warga_id' => $warga->id, 
+                    'program_bantuan_id' => $request->program_id
+                ],
+                [
+                    'status' => 1 
+                ]
+            );
 
-    } catch (\Exception $e) {
-        return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['status' => true, 'message' => 'Berhasil mendaftarkan warga'], 201);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+        }
     }
-}
+
     /**
      * 4. UPDATE STATUS (DISETUJUI/DITOLAK)
      */

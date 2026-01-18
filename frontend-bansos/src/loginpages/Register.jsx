@@ -1,14 +1,24 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import "./AuthStyle.css"; // Gunakan CSS yang sama
+import { motion } from 'framer-motion';
+// Ganti Glasses/Mask dengan Sun dan Moon
+import { User, Mail, Lock, CreditCard, ArrowRight, Sun, Moon } from 'lucide-react'; 
+import { Toaster, toast } from 'sonner'; 
+import "./AuthStyle.css";
 
 const Register = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
+    const [nik, setNik] = useState("");
+    
+    // State Password
     const [password, setPassword] = useState("");
     const [passwordConfirm, setPasswordConfirm] = useState("");
-    const [nik, setNik] = useState("");
+
+    // State untuk Toggle Lihat/Sembunyi (Terpisah untuk 2 input)
+    const [showPass, setShowPass] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     
     const [validation, setValidation] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -17,6 +27,12 @@ const Register = () => {
     const handleRegister = async (e) => {
         e.preventDefault();
         setLoading(true);
+
+        if(password !== passwordConfirm) {
+            toast.error("Password konfirmasi tidak sama!");
+            setLoading(false);
+            return;
+        }
 
         const formData = {
             name: name,
@@ -28,125 +44,177 @@ const Register = () => {
 
         try {
             await axios.post('http://localhost:8000/api/register', formData);
-            alert("Registrasi Berhasil! Silakan Login.");
-            navigate('/login');
+            toast.success("Registrasi Berhasil! Mengalihkan ke login...");
+            setTimeout(() => navigate('/login'), 1500);
         } catch (error) {
-            setValidation(error.response.data);
+            const errorData = error.response?.data || {};
+            setValidation(errorData);
+            
+            if (typeof errorData === 'object') {
+                const firstError = Object.values(errorData)[0];
+                if (firstError) toast.error(firstError[0]);
+            } else {
+                toast.error("Terjadi kesalahan saat pendaftaran");
+            }
             setLoading(false);
         }
     };
 
+    // Style dasar tombol intip (posisi & transisi)
+    const baseToggleStyle = {
+        right: '15px', 
+        top: '50%', 
+        transform: 'translateY(-50%)', 
+        cursor: 'pointer',
+        zIndex: 20,
+        transition: 'color 0.3s ease' // Efek transisi warna halus
+    };
+
     return (
         <div className="auth-container">
-            <div className="auth-card">
-                
+            <Toaster position="top-center" richColors />
+
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
+                className="auth-card"
+                style={{ maxWidth: '520px' }} 
+            >
                 <div className="text-center mb-4">
-                    <h3 className="auth-title">Buat Akun Baru</h3>
-                    <p className="auth-subtitle">Lengkapi data diri sesuai KTP untuk mendaftar</p>
+                    <h3 className="fw-bold text-dark mb-1">Buat Akun Baru</h3>
+                    <p className="text-muted small">Lengkapi data diri sesuai KTP</p>
                 </div>
 
                 <form onSubmit={handleRegister}>
-                    
-                    {/* Input Nama */}
+                    {/* Nama */}
                     <div className="mb-3">
                         <label className="form-label-custom">Nama Lengkap</label>
-                        <div className="input-group">
-                            <span className="input-group-text input-group-text-custom"><i className="bi bi-person"></i></span>
+                        <div className="input-wrapper">
                             <input 
-                                type="text" 
-                                className="form-control form-control-custom form-control-icon" 
-                                value={name} 
-                                onChange={(e) => setName(e.target.value)} 
-                                placeholder="Sesuai KTP"
-                                required
+                                type="text" className="form-control-modern" 
+                                value={name} onChange={(e) => setName(e.target.value)} 
+                                placeholder="Sesuai KTP" required
                             />
+                            <User size={18} className="input-icon" />
                         </div>
                         {validation.name && <div className="text-danger small mt-1">{validation.name[0]}</div>}
                     </div>
 
-                    {/* Input NIK */}
+                    {/* NIK */}
                     <div className="mb-3">
-                        <label className="form-label-custom">NIK (Nomor Induk Kependudukan)</label>
-                        <div className="input-group">
-                            <span className="input-group-text input-group-text-custom"><i className="bi bi-card-heading"></i></span>
+                        <label className="form-label-custom">NIK</label>
+                        <div className="input-wrapper">
                             <input 
-                                type="text" 
-                                className="form-control form-control-custom form-control-icon" 
+                                type="text" className="form-control-modern" 
                                 value={nik} 
                                 onChange={(e) => {
                                     const val = e.target.value;
                                     if (/^\d*$/.test(val)) setNik(val); 
                                 }} 
-                                placeholder="16 Digit Angka"
-                                maxLength={16}
-                                required
+                                placeholder="16 Digit Angka" maxLength={16} required
                             />
+                            <CreditCard size={18} className="input-icon" />
                         </div>
-                        <div className="d-flex justify-content-between mt-1">
-                            {validation.nik && <div className="text-danger small">{validation.nik[0]}</div>}
-                            <small className="text-muted ms-auto" style={{fontSize: '0.75rem'}}>{nik.length}/16</small>
+                        <div className="d-flex justify-content-end">
+                             <small className="text-muted" style={{fontSize: '0.7rem'}}>{nik.length}/16</small>
                         </div>
+                        {validation.nik && <div className="text-danger small mt-1">{validation.nik[0]}</div>}
                     </div>
 
-                    {/* Input Email */}
+                    {/* Email */}
                     <div className="mb-3">
-                        <label className="form-label-custom">Alamat Email</label>
-                        <div className="input-group">
-                            <span className="input-group-text input-group-text-custom"><i className="bi bi-envelope"></i></span>
+                        <label className="form-label-custom">Email</label>
+                        <div className="input-wrapper">
                             <input 
-                                type="email" 
-                                className="form-control form-control-custom form-control-icon" 
-                                value={email} 
-                                onChange={(e) => setEmail(e.target.value)} 
-                                placeholder="contoh@email.com"
-                                required
+                                type="email" className="form-control-modern" 
+                                value={email} onChange={(e) => setEmail(e.target.value)} 
+                                placeholder="email@contoh.com" required
                             />
+                            <Mail size={18} className="input-icon" />
                         </div>
                         {validation.email && <div className="text-danger small mt-1">{validation.email[0]}</div>}
                     </div>
 
-                    {/* Row untuk Password agar rapi */}
-                    <div className="row g-2 mb-3">
+                    {/* Password Row (2 Kolom) */}
+                    <div className="row g-2 mb-4">
+                        {/* Kolom Password Utama */}
                         <div className="col-md-6">
                             <label className="form-label-custom">Password</label>
-                            <input 
-                                type="password" 
-                                className="form-control form-control-custom" 
-                                value={password} 
-                                onChange={(e) => setPassword(e.target.value)} 
-                                placeholder="Min 8 char"
-                                required
-                            />
+                            <div className="input-wrapper position-relative">
+                                <input 
+                                    type={showPass ? "text" : "password"} 
+                                    className="form-control-modern" 
+                                    value={password} onChange={(e) => setPassword(e.target.value)} 
+                                    placeholder="Min 8 char" required
+                                    style={{ paddingRight: '40px' }}
+                                />
+                                <Lock size={18} className="input-icon" />
+                                
+                                {/* Tombol Matahari/Bulan 1 */}
+                                <button type="button" onClick={() => setShowPass(!showPass)} 
+                                    className="position-absolute border-0 bg-transparent p-0 d-flex align-items-center"
+                                    style={{
+                                        ...baseToggleStyle,
+                                        color: showPass ? '#f59e0b' : '#94a3b8' // Oranye jika on, Abu jika off
+                                    }} 
+                                    title={showPass ? "Sembunyikan" : "Lihat"}
+                                >
+                                    {showPass ? <Sun size={19} /> : <Moon size={19} />}
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Kolom Konfirmasi Password */}
                         <div className="col-md-6">
                             <label className="form-label-custom">Ulangi Password</label>
-                            <input 
-                                type="password" 
-                                className="form-control form-control-custom" 
-                                value={passwordConfirm} 
-                                onChange={(e) => setPasswordConfirm(e.target.value)} 
-                                placeholder="Konfirmasi"
-                                required
-                            />
+                            <div className="input-wrapper position-relative">
+                                <input 
+                                    type={showConfirm ? "text" : "password"} 
+                                    className="form-control-modern" 
+                                    value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} 
+                                    placeholder="Konfirmasi" required
+                                    style={{ paddingRight: '40px' }}
+                                />
+                                <Lock size={18} className="input-icon" />
+
+                                {/* Tombol Matahari/Bulan 2 */}
+                                <button type="button" onClick={() => setShowConfirm(!showConfirm)} 
+                                    className="position-absolute border-0 bg-transparent p-0 d-flex align-items-center"
+                                    style={{
+                                        ...baseToggleStyle,
+                                        color: showConfirm ? '#f59e0b' : '#94a3b8' // Oranye jika on, Abu jika off
+                                    }} 
+                                    title={showConfirm ? "Sembunyikan" : "Lihat"}
+                                >
+                                    {showConfirm ? <Sun size={19} /> : <Moon size={19} />}
+                                </button>
+                            </div>
                         </div>
                     </div>
                     {validation.password && <div className="text-danger small mt-1 mb-2">{validation.password[0]}</div>}
 
-                    <button 
+                    {/* Tombol Daftar */}
+                    <motion.button 
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.95 }}
                         type="submit" 
-                        className="btn btn-primary btn-primary-custom w-100 mt-2 mb-3"
+                        className="btn btn-primary w-100 py-3 rounded-3 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2"
                         disabled={loading}
+                        style={{ background: 'linear-gradient(to right, #2563eb, #3b82f6)', border: 'none' }}
                     >
-                        {loading ? 'Mendaftarkan...' : 'DAFTAR SEKARANG'}
-                    </button>
+                        {loading ? 'Mendaftarkan...' : (
+                             <>DAFTAR SEKARANG <ArrowRight size={18} /></>
+                        )}
+                    </motion.button>
                 </form>
 
-                <div className="text-center pt-3 border-top">
+                <div className="text-center pt-3 border-top mt-3">
                     <small className="text-muted">
-                        Sudah punya akun? <Link to="/login" className="auth-link">Login Disini</Link>
+                        Sudah punya akun? <Link to="/login" className="text-primary fw-bold text-decoration-none ms-1">Login Disini</Link>
                     </small>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

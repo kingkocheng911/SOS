@@ -1,110 +1,111 @@
-/* --- GLOBAL AUTH BACKGROUND --- */
+/* === CSS MESH GRADIENT (Pasti Muncul & Ringan) === */
+:root, html, body, #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+    overflow-x: hidden;
+}
+
 .auth-container {
-    min-height: 100vh;
-    width: 100%;
-    /* Gradient biru keabu-abuan yang lembut, tidak menyakitkan mata */
-    background: linear-gradient(135deg, #eef2f6 0%, #e0e7ff 100%);
+    /* Gunakan fixed agar "lepas" dari struktur normal & menempel ke layar */
+    position: fixed; 
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    width: 100vw; /* 100% Lebar Viewport */
+    height: 100vh; /* 100% Tinggi Viewport */
+    
+    /* Background Mesh Gradient (yang tadi) */
+    background-color: #f0f9ff;
+    background-image: 
+        radial-gradient(at 50% 50%, rgba(255, 255, 255, 0.8) 0px, transparent 60%),
+        radial-gradient(at 0% 100%, rgba(34, 197, 94, 0.25) 0px, transparent 50%),
+        radial-gradient(at 80% 100%, rgba(16, 185, 129, 0.2) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.25) 0px, transparent 50%),
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.2) 0px, transparent 50%);
+    background-size: cover;
+    
+    /* Flexbox untuk menaruh Card di tengah */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    
+    /* Z-index tinggi supaya menimpa elemen lain (jika ada navbar nyasar) */
+    z-index: 9999; 
+    padding: 20px; /* Jaga-jaga agar card tidak nempel pinggir di HP */
 }
 
-/* --- CARD STYLE --- */
+/* --- KARTU LOGIN (GLASS EFFECT) --- */
 .auth-card {
-    background-color: #ffffff; /* Tetap putih agar kontras dengan input, tapi soft */
-    border: none;
-    border-radius: 16px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04); /* Bayangan sangat halus */
-    overflow: hidden;
+    /* Putih bersih dengan sedikit transparansi agar warna background "tembus" dikit */
+    background-color: rgba(255, 255, 255, 0.75);
+    
+    /* Efek Kaca Buram (Blur) */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* Garis pinggir tipis putih */
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    
+    border-radius: 24px;
+    /* Shadow lembut */
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); 
+    
     width: 100%;
-    max-width: 450px; /* Lebar maksimal di desktop */
-    padding: 40px 30px;
-    transition: transform 0.2s ease;
+    max-width: 420px;
+    padding: 40px 35px;
+    
+    position: relative;
+    z-index: 10; /* Card harus di atas background */
 }
 
-/* --- TYPOGRAPHY --- */
-.auth-title {
-    font-weight: 800;
-    color: #1e293b; /* Dark Blue-Gray */
-    margin-bottom: 5px;
+/* --- INPUT FORM --- */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.auth-subtitle {
-    color: #64748b; /* Soft Gray */
-    font-size: 0.9rem;
-    margin-bottom: 30px;
+.input-icon {
+    position: absolute;
+    left: 16px;
+    color: #94a3b8;
+    pointer-events: none;
+    z-index: 10;
+    transition: color 0.3s;
 }
 
-/* --- FORM INPUTS --- */
-.form-control-custom {
-    background-color: #f8fafc; /* Latar input sedikit abu-abu, bukan putih silau */
-    border: 1px solid #e2e8f0;
-    padding: 12px 15px;
-    border-radius: 8px;
+.form-control-modern:focus + .input-icon,
+.input-wrapper:focus-within .input-icon {
+    color: #0ea5e9; /* Icon jadi biru saat diketik */
+}
+
+.form-control-modern {
+    background-color: rgba(255, 255, 255, 0.9); /* Putih agak transparan */
+    border: 1px solid #cbd5e1;
+    padding: 12px 15px 12px 48px; /* Padding kiri besar untuk icon */
+    border-radius: 12px;
     color: #334155;
     font-size: 0.95rem;
-    transition: all 0.3s ease;
+    width: 100%;
+    transition: all 0.3s;
 }
 
-.form-control-custom:focus {
+.form-control-modern:focus {
     background-color: #ffffff;
-    border-color: #3b82f6; /* Biru Fokus */
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15); /* Efek glow biru saat fokus */
     outline: none;
 }
 
-/* Label di atas input */
 .form-label-custom {
     font-size: 0.85rem;
     font-weight: 600;
     color: #475569;
     margin-bottom: 6px;
     display: block;
-}
-
-/* --- BUTTONS --- */
-.btn-primary-custom {
-    background: linear-gradient(to right, #2563eb, #3b82f6); /* Gradient Biru Profesional */
-    border: none;
-    padding: 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    transition: all 0.3s ease;
-}
-
-.btn-primary-custom:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
-    background: linear-gradient(to right, #1d4ed8, #2563eb);
-}
-
-/* --- LINKS --- */
-.auth-link {
-    color: #2563eb;
-    font-weight: 600;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-.auth-link:hover {
-    color: #1e40af;
-    text-decoration: underline;
-}
-
-/* --- ICONS IN INPUT --- */
-.input-group-text-custom {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-right: none;
-    color: #94a3b8;
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-}
-.form-control-icon {
-    border-left: none;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+    margin-left: 4px;
 }

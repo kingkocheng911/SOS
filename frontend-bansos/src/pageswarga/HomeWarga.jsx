@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Toaster, toast } from 'sonner'; // 1. Import Sonner
 
 // IMPORT CSS MODULAR
 import './HomeWarga.css'; 
@@ -104,12 +105,16 @@ function HomeWarga({ page }) {
         } catch (error) { console.error("Gagal ambil notif:", error); }
     };
 
-    // --- BAGIAN YANG DIEDIT: PERBAIKAN ERROR 422 ---
+    // --- BAGIAN YANG DIEDIT: PENGGUNAAN TOAST & ERROR HANDLING ---
     const handleSubmitPengajuan = async (e) => {
-        e.preventDefault();
+        if (e) e.preventDefault();
         
+        // Validasi Manual
         if (!jenisBansos || !alasan) {
-            alert("Harap pilih program dan isi alasan pengajuan.");
+            toast.warning("Data Belum Lengkap", {
+                description: "Harap pilih program dan isi alasan pengajuan.",
+                duration: 3000
+            });
             return;
         }
 
@@ -117,7 +122,7 @@ function HomeWarga({ page }) {
         const token = localStorage.getItem("token");
 
         try {
-            // Kita gunakan 'program_id' karena itulah yang diminta oleh backend Anda
+            // Proses API
             await axios.post("http://127.0.0.1:8000/api/seleksi", {
                 warga_id: user.id,
                 program_id: jenisBansos, 
@@ -125,19 +130,32 @@ function HomeWarga({ page }) {
                 status: 1
             }, { headers: { Authorization: `Bearer ${token}` } });
 
-            alert("Pengajuan Berhasil Dikirim!");
+            // Sukses (Notifikasi Sukses ditangani oleh child component AjukanBantuan agar lebih sinkron dengan UI-nya)
             setAlasan("");
             fetchStatusBansos(token); 
-            navigate("/home"); 
+            
+            // Optional: Redirect atau tetap di halaman
+            // navigate("/home"); 
+
         } catch (error) {
+            // Error Handling dengan Toast
             if (error.response && error.response.status === 422) {
-                // Menampilkan pesan error spesifik dari backend (misal: "alasan terlalu pendek")
                 const validationErrors = error.response.data.errors;
-                const messages = Object.values(validationErrors).flat().join("\n");
-                alert(`Gagal Validasi:\n${messages}`);
+                const messages = Object.values(validationErrors).flat().join(", ");
+                
+                toast.error("Gagal Validasi", {
+                    description: messages,
+                    duration: 5000
+                });
             } else {
-                alert(error.response?.data?.message || "Terjadi kesalahan saat mengirim pengajuan.");
+                toast.error("Terjadi Kesalahan", {
+                    description: error.response?.data?.message || "Gagal mengirim pengajuan. Coba lagi nanti.",
+                    duration: 4000
+                });
             }
+            
+            // PENTING: Melempar error agar AjukanBantuan.jsx tahu proses gagal & stop spinner
+            throw error; 
         } finally {
             setIsSubmitting(false);
         }
@@ -175,15 +193,24 @@ function HomeWarga({ page }) {
         Object.keys(formData).forEach(key => {
             if (formData[key] !== null) dataToSend.append(key, formData[key]);
         });
+        
         try {
             const response = await axios.post("http://127.0.0.1:8000/api/user/update", dataToSend, {
                 headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
             });
-            alert("Profil berhasil diperbarui!");
+            
             localStorage.setItem("user", JSON.stringify(response.data.user));
             setUser(response.data.user);
+            
+            toast.success("Profil Diperbarui", {
+                description: "Data diri Anda berhasil disimpan.",
+            });
+
         } catch (error) {
-            alert("Gagal update profil.");
+            console.error(error);
+            toast.error("Gagal Update Profil", {
+                description: "Periksa koneksi atau inputan Anda."
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -191,6 +218,9 @@ function HomeWarga({ page }) {
 
     return (
         <div className="w-100 animate-fade-in">
+            {/* 2. COMPONENT TOASTER DITARUH DISINI AGAR SELALU MUNCUL DIATAS */}
+            <Toaster position="top-center" richColors closeButton style={{ zIndex: 99999 }} />
+
             <header className="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                 <div>
                     <h2 className="fw-bold text-dark mb-0">

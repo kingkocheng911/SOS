@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Toaster, toast } from 'sonner'; 
 import './ProfilWarga.css'; 
+
+// --- KONFIGURASI HOSTING ---
+// Saat di localhost pakai: "http://localhost:8000" atau "http://127.0.0.1:8000"
+// Saat hosting ganti jadi: "https://domain-kamu.com"
+const API_BASE_URL = "http://127.0.0.1:8000"; 
+
+// Pastikan kamu sudah menaruh file 'default-avatar.png' di folder 'public' React kamu
+const DEFAULT_AVATAR = "/default-avatar.png"; 
 
 const ProfilWarga = ({
     user,
@@ -24,10 +33,18 @@ const ProfilWarga = ({
     const [listOpsiRW, setListOpsiRW] = useState([]);
     const [listOpsiRT, setListOpsiRT] = useState([]);
 
+    // Fungsi pintar untuk menentukan gambar mana yang dipakai
+    const getProfileImage = (userFoto) => {
+        if (previewUrl) return previewUrl; // 1. Tampilkan preview jika baru upload
+        if (userFoto) return `${API_BASE_URL}/uploads/profil/${userFoto}`; // 2. Tampilkan dari server
+        return DEFAULT_AVATAR; // 3. Tampilkan default jika kosong
+    };
+
     useEffect(() => {
         const fetchWilayah = async () => {
             try {
-                const response = await axios.get("http://127.0.0.1:8000/api/wilayah-desa");
+                // Menggunakan variable API_BASE_URL agar dinamis
+                const response = await axios.get(`${API_BASE_URL}/api/wilayah-desa`);
                 setMasterWilayah(response.data);
             } catch (error) {
                 console.error("Gagal ambil data wilayah:", error);
@@ -71,12 +88,24 @@ const ProfilWarga = ({
 
     const handleLocalSubmit = async (e) => {
         e.preventDefault();
-        await handleUpdateProfile(e); 
-        setIsEditing(false);
+        try {
+            await handleUpdateProfile(e); 
+            
+            toast.success("Profil Berhasil Diperbarui!", {
+                description: "Data terbaru Anda telah tersimpan di sistem.",
+                duration: 4000,
+            });
+
+            setIsEditing(false);
+        } catch (error) {
+            console.error(error);
+        }
     };
 
     return (
         <div className="profile-container-modern animate-fade-in">
+            <Toaster position="top-center" richColors />
+
             {/* Header / Cover */}
             <div className="profile-banner">
                 {!isEditing && (
@@ -93,9 +122,14 @@ const ProfilWarga = ({
                         <div className="avatar-container-left">
                             <div className="avatar-wrapper shadow">
                                 <img 
-                                    src={previewUrl || (user.foto ? `http://localhost:8000/uploads/profil/${user.foto}` : "https://via.placeholder.com/150")} 
+                                    src={getProfileImage(user.foto)} 
                                     alt="User" 
                                     className="img-profile-left"
+                                    // Fallback: Jika gambar server error (404), paksa pakai default
+                                    onError={(e) => {
+                                        e.target.onerror = null; 
+                                        e.target.src = DEFAULT_AVATAR;
+                                    }}
                                 />
                                 {isEditing && (
                                     <label htmlFor="upload-foto" className="upload-badge">
@@ -122,36 +156,55 @@ const ProfilWarga = ({
                         {!isEditing ? (
                             /* --- MODE VIEW --- */
                             <div className="info-grid-modern animate-slide-up">
+                                {/* 1. WhatsApp Logo (Hijau) */}
                                 <div className="info-item-card">
-                                    <div className="icon-circle"><i className="bi bi-whatsapp"></i></div>
+                                    <div className="icon-circle bg-success bg-opacity-10">
+                                        <i className="bi bi-whatsapp text-success fs-4"></i>
+                                    </div>
                                     <div className="info-label-group">
                                         <label>WhatsApp</label>
                                         <p>{formData.no_telp || "-"}</p>
                                     </div>
                                 </div>
+
+                                {/* 2. Pekerjaan Logo (Biru) */}
                                 <div className="info-item-card">
-                                    <div className="icon-circle"><i className="bi bi-briefcase"></i></div>
+                                    <div className="icon-circle bg-primary bg-opacity-10">
+                                        <i className="bi bi-briefcase-fill text-primary fs-4"></i>
+                                    </div>
                                     <div className="info-label-group">
                                         <label>Pekerjaan</label>
                                         <p>{isUnemployed ? "Tidak Bekerja" : formData.pekerjaan}</p>
                                     </div>
                                 </div>
+
+                                {/* 3. Penghasilan Logo (Kuning/Emas) */}
                                 <div className="info-item-card">
-                                    <div className="icon-circle"><i className="bi bi-cash-stack"></i></div>
+                                    <div className="icon-circle bg-warning bg-opacity-10">
+                                        <i className="bi bi-cash-stack text-warning fs-4"></i>
+                                    </div>
                                     <div className="info-label-group">
                                         <label>Penghasilan</label>
                                         <p className="text-success fw-bold">Rp {parseInt(formData.gaji || 0).toLocaleString('id-ID')}</p>
                                     </div>
                                 </div>
+
+                                {/* 4. Tanggungan Logo (Cyan) */}
                                 <div className="info-item-card">
-                                    <div className="icon-circle"><i className="bi bi-people"></i></div>
+                                    <div className="icon-circle bg-info bg-opacity-10">
+                                        <i className="bi bi-people-fill text-info fs-4"></i>
+                                    </div>
                                     <div className="info-label-group">
                                         <label>Tanggungan</label>
                                         <p>{formData.tanggungan} Orang</p>
                                     </div>
                                 </div>
+
+                                {/* 5. Alamat Logo (Merah) */}
                                 <div className="info-item-card full-width">
-                                    <div className="icon-circle"><i className="bi bi-geo-alt"></i></div>
+                                    <div className="icon-circle bg-danger bg-opacity-10">
+                                        <i className="bi bi-geo-alt-fill text-danger fs-4"></i>
+                                    </div>
                                     <div className="info-label-group">
                                         <label>Alamat Domisili</label>
                                         <p>{formData.alamat || "Alamat belum dilengkapi"}</p>

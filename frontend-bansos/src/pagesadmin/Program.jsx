@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from "sweetalert2"; // Import SweetAlert2
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   PlusCircle, 
@@ -54,6 +55,7 @@ function ProgramBantuan() {
     });
     setEditId(item.id);
     
+    // Scroll ke atas otomatis saat klik edit
     const mainContent = document.querySelector('main');
     if (mainContent) {
         mainContent.scrollTo({ top: 0, behavior: 'smooth' });
@@ -67,23 +69,53 @@ function ProgramBantuan() {
     setEditId(null);
   };
 
+  // --- LOGIC HAPUS DENGAN SWEETALERT ---
   const handleDelete = async () => {
     if(!editId) return;
-    if(!window.confirm("Hapus program ini secara permanen?")) return;
 
-    try {
-        await axios.delete(`http://127.0.0.1:8000/api/program/${editId}`);
-        alert("Program berhasil dihapus.");
-        handleCancel();
-        fetchData();
-    } catch (error) {
-        alert("Gagal menghapus data.");
+    // Konfirmasi SweetAlert
+    const result = await Swal.fire({
+        title: 'Hapus Program?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            await axios.delete(`http://127.0.0.1:8000/api/program/${editId}`);
+            
+            // Notifikasi Sukses
+            Swal.fire({
+                icon: 'success',
+                title: 'Terhapus!',
+                text: 'Program bantuan berhasil dihapus.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            handleCancel();
+            fetchData();
+        } catch (error) {
+            // Notifikasi Error
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Terjadi kesalahan saat menghapus data.',
+            });
+        }
     }
   };
 
+  // --- LOGIC SIMPAN DENGAN SWEETALERT ---
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    
     try {
       const payload = {
         ...formData,
@@ -93,16 +125,42 @@ function ProgramBantuan() {
 
       if (editId) {
         await axios.put(`http://127.0.0.1:8000/api/program/${editId}`, payload);
-        alert("Berhasil diperbarui!");
+        
+        // Notifikasi Edit Sukses
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Data program berhasil diperbarui.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+
       } else {
         await axios.post("http://127.0.0.1:8000/api/program", payload);
-        alert("Berhasil ditambahkan!");
+        
+        // Notifikasi Tambah Sukses
+        Swal.fire({
+            icon: 'success',
+            title: 'Berhasil!',
+            text: 'Program baru berhasil ditambahkan.',
+            timer: 2000,
+            showConfirmButton: false
+        });
       }
+
       handleCancel();
       fetchData();
+
     } catch (error) {
-      alert("Gagal menyimpan.");
+      console.error(error);
+      // Notifikasi Error
+      Swal.fire({
+        icon: 'error',
+        title: 'Gagal Menyimpan',
+        text: error.response?.data?.message || 'Terjadi kesalahan pada server.',
+      });
     }
+    
     setIsLoading(false);
   };
 

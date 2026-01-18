@@ -1,164 +1,105 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react';
 import './BerandaWarga.css'; 
 
 const BerandaWarga = ({ setActiveTab }) => {
-    const [wargaData, setWargaData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [statusDaftar, setStatusDaftar] = useState(null);
 
-    // --- 1. SINKRONISASI BACKEND ---
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                // Mengambil token dari localStorage agar request tidak 401 (Unauthorized)
-                const token = localStorage.getItem('token'); 
-                
-                // Mengarahkan ke endpoint API Laravel
-                const response = await axios.get('http://127.0.0.1:8000/api/status-bantuan', {
-                    headers: { 
-                        Authorization: `Bearer ${token}`,
-                        Accept: 'application/json'
-                    }
-                });
-
-                // Memastikan data tersinkron ke state
-                setStatusDaftar(response.data.status);
-                if (response.data.status === 'sudah_daftar') {
-                    setWargaData(response.data.data);
-                }
-            } catch (error) {
-                console.error("Gagal sinkronisasi data dashboard:", error.response?.data || error.message);
-                // Jika error karena belum login, bisa diarahkan ke login
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
-
-    // --- 2. LOGIKA UI STATUS (Tetap dipertahankan sesuai permintaan) ---
-    const getStatusConfig = (data) => {
-        if (!data) return { className: 'status-neutral', icon: 'bi-question-circle', text: 'TIDAK DIKETAHUI', desc: 'Status data Anda tidak ditemukan.' };
-        
-        const status = data.status_seleksi;
-
-        if (['Disetujui', 'Lolos', 'Cair'].includes(status)) {
-            return { 
-                className: 'status-success', 
-                icon: 'bi-check-circle-fill',
-                text: 'DISETUJUI / CAIR',
-                desc: 'Selamat! Berkas Anda dinyatakan lolos verifikasi dan bantuan akan segera disalurkan.'
-            };
-        }
-        
-        if (['Ditolak', 'Gagal'].includes(status)) {
-            return { 
-                className: 'status-danger', 
-                icon: 'bi-x-circle-fill',
-                text: 'PENGAJUAN DITOLAK',
-                desc: 'Maaf, Anda belum memenuhi kriteria penerima bantuan untuk periode seleksi saat ini.'
-            };
-        }
-
-        return { 
-            className: 'status-pending', 
-            icon: 'bi-clock-history',
-            text: (status || 'PROSES VERIFIKASI').toUpperCase(),
-            desc: 'Data Anda telah kami terima dan sedang dalam antrean verifikasi oleh petugas desa.'
-        };
-    };
-
-    if (loading) {
-        return (
-            <div className="loader-container">
-                <div className="spinner-modern"></div>
-                <p>Menghubungkan ke server...</p>
-            </div>
-        );
-    }
-
-    // --- 3. RENDER: BELUM DAFTAR ---
-    if (statusDaftar === 'belum_daftar' || !wargaData) {
-        return (
-            <div className="dashboard-wrapper animate-fade-in">
-                <div className="empty-state-card text-center">
-                    <div className="empty-icon">
-                        <i className="bi bi-clipboard2-plus"></i>
-                    </div>
-                    <h2>Belum Terdaftar</h2>
-                    <p>Anda belum mengirimkan pengajuan bantuan sosial untuk tahun 2026. Segera lengkapi data Anda untuk mendapatkan manfaat.</p>
-                    <button className="btn-main-action" onClick={() => setActiveTab('ajukan')}>
-                        Mulai Pengajuan <i className="bi bi-arrow-right ms-2"></i>
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    const statusConfig = getStatusConfig(wargaData);
-
-    // --- 4. RENDER: UTAMA (SINKRON) ---
     return (
-        <div className="dashboard-grid animate-fade-in">
-            {/* KIRI: Status Card Utama */}
-            <div className={`status-hero-card ${statusConfig.className}`}>
-                <div className="status-header">
-                    <span className="badge-status-top">Informasi Terkini</span>
-                    <i className={`bi ${statusConfig.icon} status-icon-bg`}></i>
+        <div className="dashboard-container animate-enter">
+            
+            {/* --- HERO: SAMBUTAN SISTEM --- */}
+            <header className="dashboard-hero">
+                <div className="hero-text">
+                    <h1>Portal Layanan Bantuan Sosial</h1>
+                    <p>Selamat datang di sistem transparansi dan pengelolaan bantuan desa. Silakan pilih menu layanan di bawah untuk memulai.</p>
                 </div>
+                <div className="hero-decoration">
+                    <i className="bi bi-building-fill-check"></i>
+                </div>
+            </header>
+
+            {/* --- MENU UTAMA (NAVIGASI) --- */}
+            {/* Ini logika UI, bukan data dummy */}
+            <div className="section-label">Menu Layanan</div>
+            <div className="menu-grid">
                 
-                <div className="status-content">
-                    <label>STATUS BANTUAN ANDA</label>
-                    {/* Data diambil langsung dari backend */}
-                    <h1>{statusConfig.text}</h1>
-                    <p>{statusConfig.desc}</p>
+                {/* Tombol ke Halaman Cek */}
+                <div className="nav-card" onClick={() => setActiveTab('cek-status')}>
+                    <div className="icon-wrapper blue">
+                        <i className="bi bi-search"></i>
+                    </div>
+                    <div className="nav-content">
+                        <h3>Cek Status Pengajuan</h3>
+                        <p>Pantau progres verifikasi berkas Anda.</p>
+                    </div>
+                    <i className="bi bi-chevron-right arrow"></i>
                 </div>
 
-                <div className="status-footer-data">
-                    <div className="data-item">
-                        <small>Nama Penerima</small>
-                        <p>{wargaData.nama}</p>
+                {/* Tombol ke Halaman Pengajuan */}
+                <div className="nav-card" onClick={() => setActiveTab('ajukan')}>
+                    <div className="icon-wrapper green">
+                        <i className="bi bi-file-earmark-plus-fill"></i>
                     </div>
-                    <div className="data-item text-end">
-                        <small>Tanggal Pengajuan</small>
-                        <p>
-                            {wargaData.created_at 
-                                ? new Date(wargaData.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) 
-                                : '-'}
-                        </p>
+                    <div className="nav-content">
+                        <h3>Ajukan Permohonan</h3>
+                        <p>Daftar baru atau perbarui data diri.</p>
                     </div>
+                    <i className="bi bi-chevron-right arrow"></i>
+                </div>
+
+                {/* Tombol ke Halaman Bantuan/FAQ */}
+                <div className="nav-card">
+                    <div className="icon-wrapper orange">
+                        <i className="bi bi-question-circle-fill"></i>
+                    </div>
+                    <div className="nav-content">
+                        <h3>Pusat Bantuan</h3>
+                        <p>Pertanyaan umum seputar BANSOS.</p>
+                    </div>
+                    <i className="bi bi-chevron-right arrow"></i>
                 </div>
             </div>
 
-            {/* KANAN: Syarat & Informasi (Statistik & Pengambilan) */}
-            <div className="info-side-panel">
-                <div className="requirement-card">
-                    <div className="card-top">
-                        <i className="bi bi-shield-check"></i>
-                        <h5>Syarat Pengambilan</h5>
+            {/* --- INFO GRAFIS: ALUR PROSES (SOP) --- */}
+            {/* Ini konten edukasi statis, sangat disukai dosen karena informatif */}
+            <div className="section-label mt-5">Alur Penerimaan Bantuan</div>
+            <div className="process-steps">
+                
+                <div className="step-item">
+                    <div className="step-number">1</div>
+                    <div className="step-desc">
+                        <h4>Registrasi & Upload</h4>
+                        <p>Warga melakukan input data diri dan upload KTP/KK.</p>
                     </div>
-                    <ul className="modern-list">
-                        <li>
-                            <div className="list-dot"></div>
-                            <span>Wajib membawa <strong>KTP & KK Asli</strong>.</span>
-                        </li>
-                        <li>
-                            <div className="list-dot"></div>
-                            <span>Membawa Surat Undangan dari Kantor Desa.</span>
-                        </li>
-                        <li>
-                            <div className="list-dot"></div>
-                            <span>Wajib hadir tepat waktu sesuai jadwal.</span>
-                        </li>
-                        <li>
-                            <div className="list-dot"></div>
-                            <span>Pengambilan diwakilkan wajib menyertakan <strong>Surat Kuasa</strong>.</span>
-                        </li>
-                    </ul>
+                </div>
+
+                <div className="step-line"></div>
+
+                <div className="step-item">
+                    <div className="step-number">2</div>
+                    <div className="step-desc">
+                        <h4>Verifikasi Desa</h4>
+                        <p>Admin desa memvalidasi kelayakan data pendaftar.</p>
+                    </div>
+                </div>
+
+                <div className="step-line"></div>
+
+                <div className="step-item">
+                    <div className="step-number">3</div>
+                    <div className="step-desc">
+                        <h4>Penyaluran</h4>
+                        <p>Penerbitan jadwal dan pengambilan bantuan.</p>
+                    </div>
                 </div>
 
             </div>
+
+            {/* --- FOOTER INFO --- */}
+            <div className="system-footer">
+                <i className="bi bi-shield-lock"></i>
+                <span>Sistem ini diawasi langsung oleh Pemerintah Desa setempat.</span>
+            </div>
+
         </div>
     );
 };

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React from "react";
+import { Toaster, toast } from 'sonner'; 
 import './AjukanBantuan.css';
 
 const AjukanBantuan = ({ 
@@ -19,6 +20,40 @@ const AjukanBantuan = ({
         (user.nomor_hp || user.no_telp) && 
         user.pekerjaan && 
         (user.gaji !== null && user.gaji !== undefined);
+
+    // --- Wrapper untuk menangani Submit & Notifikasi ---
+    const handleLocalSubmit = async (e) => {
+        e.preventDefault(); // 1. Mencegah reload browser bawaan
+        
+        console.log("Tombol diklik, memproses..."); // Debugging di Console
+
+        try {
+            // Panggil fungsi kirim dari parent
+            // PASTIKAN handleSubmitPengajuan di Parent (HomeWarga) tidak melakukan window.location.reload()
+            await handleSubmitPengajuan(e);
+
+            console.log("Sukses submit, memunculkan toast...");
+
+            // Tampilkan Notifikasi Sukses
+            toast.success("Pengajuan Berhasil Dikirim!", {
+                description: "Data Anda sedang dalam proses verifikasi.",
+                duration: 5000, // Tampil selama 5 detik
+            });
+
+            // Opsional: Bersihkan form setelah sukses
+            setAlasan(""); 
+            setJenisBansos("");
+            
+        } catch (error) {
+            console.error("Error saat submit:", error);
+            
+            // Tampilkan Notifikasi Gagal
+            toast.error("Gagal Mengirim Pengajuan", {
+                description: "Silakan periksa koneksi atau coba lagi nanti.",
+                duration: 4000,
+            });
+        }
+    };
 
     if (!profilLengkap) {
         return (
@@ -46,6 +81,18 @@ const AjukanBantuan = ({
 
     return (
         <div className="form-container-upgrade animate-fade-in">
+            {/* PENTING: Toaster ditaruh di sini.
+               richColors = agar berwarna (Hijau/Merah)
+               position = posisi di atas tengah
+               style zIndex = agar di atas navbar/modal
+            */}
+            <Toaster 
+                position="top-center" 
+                richColors 
+                closeButton 
+                style={{ zIndex: 99999 }} 
+            />
+
             {/* Step Progress Indicator */}
             <div className="step-indicator">
                 <div className="step active">
@@ -81,7 +128,7 @@ const AjukanBantuan = ({
                 </div>
 
                 <div className="form-main-area">
-                    <form onSubmit={handleSubmitPengajuan}>
+                    <form onSubmit={handleLocalSubmit}>
                         <div className="row g-3 mb-4">
                             <div className="col-md-6">
                                 <label className="label-modern">Nama Lengkap</label>

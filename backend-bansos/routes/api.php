@@ -65,6 +65,8 @@ Route::middleware('auth:sanctum')->group(function () {
     // --- PENYALURAN ---
     Route::get('/penyaluran', [PenyaluranController::class, 'index']);
     Route::post('/penyaluran', [PenyaluranController::class, 'store']);
+    Route::get('/penyaluran/penerima-tersedia', [PenyaluranController::class, 'getPenerimaTersedia']);
+    Route::resource('penyaluran', PenyaluranController::class);
 
     // --- NOTIFIKASI ---
     Route::get('/notifikasi', function (Request $request) {

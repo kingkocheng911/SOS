@@ -39,7 +39,8 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar-container d-flex flex-column h-100 shadow-sm">
+    <div className="sidebar-container d-flex flex-column h-100 shadow-sm"
+    style={{ paddingTop: '100px' }}>
       {/* Brand & Logout sudah dihapus sesuai permintaan sebelumnya */}
       
       <div className="flex-grow-1 overflow-y-auto px-2 py-3">

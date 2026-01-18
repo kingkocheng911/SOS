@@ -20,7 +20,7 @@
     padding: 25px;
 }
 
-/* --- INPUT & ICON (SOLUSI BIAR GAK NABRAK) --- */
+/* --- INPUT & ICON --- */
 .input-with-icon {
     position: relative;
     width: 100%;
@@ -38,9 +38,10 @@
 
 .custom-input {
     width: 100%;
-    padding-left: 45px !important; /* Ruang untuk ikon */
-    padding-right: 15px !important;
-    height: 50px; /* Tinggi seragam */
+    /* padding-left diatur ulang untuk checklist agar tidak terlalu menjorok */
+    padding-left: 45px; 
+    padding-right: 15px;
+    height: 50px;
     border-radius: 10px;
     border: 1.5px solid #e2e8f0;
     font-size: 0.95rem;
@@ -53,12 +54,12 @@
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
-/* --- TOMBOL SIMPAN (SOLUSI BIAR GAK TERPOTONG) --- */
+/* --- TOMBOL SIMPAN --- */
 .btn-modern-primary {
     background: #2563eb;
     color: white;
     border: none;
-    height: 50px; /* Samakan dengan tinggi input */
+    height: 50px;
     padding: 0 20px;
     border-radius: 10px;
     font-weight: 600;
@@ -68,7 +69,7 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    white-space: nowrap; /* Teks tidak akan turun ke bawah */
+    white-space: nowrap;
     width: 100%;
 }
 
@@ -96,4 +97,61 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
+}
+
+/* --- NEW: STYLES KHUSUS CHECKLIST --- */
+
+/* Container box untuk checklist (menggantikan fungsi select) */
+.checklist-box.custom-input {
+    height: 180px; /* Tinggi fix agar bisa discroll */
+    overflow-y: auto;
+    padding: 10px !important; /* Override padding default custom-input */
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background-color: #fff;
+}
+
+/* Item individual dalam checklist */
+.checklist-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    border: 1px solid transparent;
+}
+
+.checklist-item:hover {
+    background-color: #f1f5f9;
+    border-color: #e2e8f0;
+}
+
+/* Label checklist */
+.checklist-label {
+    margin-left: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    flex-grow: 1; /* Agar area klik luas */
+    user-select: none;
+}
+
+/* Tombol Pilih Semua */
+.btn-text-only {
+    background: none;
+    border: none;
+    color: #2563eb;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+}
+
+.btn-text-only:hover {
+    text-decoration: underline;
+    color: #1d4ed8;
+}
+
+.inline-icon {
+    vertical-align: text-bottom;
 }

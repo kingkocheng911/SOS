@@ -15,7 +15,6 @@ const Navbar = () => {
         console.error("Error parsing user data:", error);
     }
 
-    // Fungsi Logout
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -23,21 +22,38 @@ const Navbar = () => {
     };
 
     return (
-        // Navbar Biru Full Width
-        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" style={{ zIndex: 1000 }}>
+        <nav className="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" style={{ zIndex: 1000, padding: '0.5rem 0' }}>
             <div className="container-fluid px-4">
                 
-                {/* 1. JUDUL APLIKASI (Kiri) */}
-                <Link className="navbar-brand fw-bold fs-4" to="/">
-                    BANSOS APP
+                {/* 1. LOGO & JUDUL (Kiri) */}
+                <Link className="navbar-brand d-flex align-items-center" to="/">
+                    {/* Karena file ada di folder 'public', kita akses langsung dengan "/namafile.png".
+                       React/Vite otomatis akan mencarinya di folder public.
+                    */}
+                    <img 
+                        src="/logodesa.png" 
+                        alt="Logo Desa" 
+                        className="me-2"
+                        style={{ 
+                            height: '45px',    // Ukuran disesuaikan agar rapi di navbar
+                            width: 'auto', 
+                            objectFit: 'contain'
+                        }} 
+                    />
+                    
+                    {/* Teks Judul */}
+                    <div className="d-flex flex-column justify-content-center">
+                        <span className="fw-bold fs-5" style={{ lineHeight: '1.1' }}>DESA BANTU</span>
+                        <span className="fw-light text-white-50" style={{ fontSize: '0.7rem', letterSpacing: '0.5px' }}>
+                            Sistem Distribusi Bantuan Sosial
+                        </span>
+                    </div>
                 </Link>
-
-                {/* (Menu Tengah dihapus sesuai permintaan) */}
 
                 {/* 2. PROFIL & LOGOUT (Kanan) */}
                 <div className="d-flex align-items-center ms-auto">
                     
-                    {/* Info User (Nama & Role) - Disembunyikan di layar HP kecil */}
+                    {/* Info User (Nama & Role) */}
                     <div className="text-end text-white me-3 d-none d-md-block">
                         <div className="fw-bold" style={{ fontSize: '0.9rem' }}>
                             {user.name || 'Admin Bansos'}

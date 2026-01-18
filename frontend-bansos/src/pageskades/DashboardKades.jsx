@@ -15,7 +15,7 @@ const DashboardKades = () => {
    * kita langsung arahkan URL ke folder tersebut.
    */
   const fotoUrl = user.foto 
-    ? `http://127.0.0.1:8000/uploads/${user.foto}` 
+    ? `http://127.0.0.1:8000/uploads/profil/${user.foto}` // Tambahkan /profil/ di sini
     : "https://ui-avatars.com/api/?name=Kepala+Desa&background=0d6efd&color=fff";
 
   return (
